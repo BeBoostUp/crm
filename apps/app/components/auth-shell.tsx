@@ -18,10 +18,10 @@ export function AuthShell({ children }: { children: ReactNode }) {
 				<div className="relative flex max-w-lg flex-col gap-8">
 					<div className="flex flex-col gap-4">
 						<p className="font-mono text-xs/4 text-muted-foreground uppercase">
-							CRM
+							FlowAds
 						</p>
 						<h1 className="max-w-[14ch] text-5xl/14 font-semibold text-balance">
-							Every customer, one place.
+							El plano de la campaña, antes del Ads Manager.
 						</h1>
 					</div>
 				</div>

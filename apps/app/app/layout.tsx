@@ -21,10 +21,10 @@ const fontMono = Geist_Mono({
 
 export const metadata: Metadata = {
 	title: {
-		default: "Comp AI - CRM",
-		template: "%s · Comp AI CRM",
+		default: "FlowAds",
+		template: "%s · FlowAds",
 	},
-	description: "Customer Relationship Management for Comp AI",
+	description: "El plano de la campaña antes de tocar el Ads Manager.",
 	icons: {
 		icon: [
 			{ url: "/favicon.svg", type: "image/svg+xml" },

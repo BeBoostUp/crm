@@ -40,7 +40,9 @@ type RailItem = {
 	related?: string[];
 };
 
-const ITEMS: RailItem[] = [
+const SHOW_CRM = false;
+
+const CRM_ITEMS: RailItem[] = [
 	{ title: "Overview", href: "/", icon: Dashboard, match: "exact" },
 	{
 		title: "Chat",
@@ -58,9 +60,17 @@ const ITEMS: RailItem[] = [
 		match: "prefix",
 	},
 	{ title: "Deals", href: "/deals", icon: Partnership, match: "prefix" },
-	{ title: "Flow", href: "/flow", icon: FlowConnection, match: "prefix" },
 	{ title: "Settings", href: "/settings", icon: Settings, match: "prefix" },
 ];
+
+const FLOW_ITEM: RailItem = {
+	title: "FlowAds",
+	href: "/flow",
+	icon: FlowConnection,
+	match: "prefix",
+};
+
+const ITEMS: RailItem[] = SHOW_CRM ? [FLOW_ITEM, ...CRM_ITEMS] : [FLOW_ITEM];
 
 function isActive(item: RailItem, pathname: string): boolean {
 	return (

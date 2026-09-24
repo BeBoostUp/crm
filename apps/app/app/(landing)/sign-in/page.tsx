@@ -46,8 +46,8 @@ export default function SignInPage({ searchParams }: PageProps<"/sign-in">) {
 			<Suspense
 				fallback={
 					<AuthHeading
-						title="Welcome back"
-						description="Sign in with your account to continue."
+						title="Bienvenido a FlowAds"
+						description="Entrá con tu cuenta de Google para continuar."
 					/>
 				}
 			>
@@ -106,8 +106,8 @@ async function SignIn({
 	return (
 		<>
 			<AuthHeading
-				title="Welcome back"
-				description="Sign in with your account to continue."
+				title="Bienvenido a FlowAds"
+				description="Entrá con tu cuenta de Google para continuar."
 			/>
 
 			{showSso ? <SsoSignIn providers={providers} /> : null}

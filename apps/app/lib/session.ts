@@ -26,10 +26,15 @@ export const signInAccounts = cache(async (userId: string) =>
 	}),
 );
 
+const MAILBOX_GATE = false;
+
 export async function requireMailboxAccess(): Promise<Session> {
 	const session = await requireSession();
 
-	if (needsMailboxGrant(await signInAccounts(session.user.id))) {
+	if (
+		MAILBOX_GATE &&
+		needsMailboxGrant(await signInAccounts(session.user.id))
+	) {
 		redirect("/grant-access");
 	}
 

@@ -14,6 +14,10 @@ const LANDING_PATH = "/";
 
 const SIGN_IN_PATH = "/sign-in";
 
+const HOME_SECTION = "/flow";
+
+const RESEARCH_GATE = false;
+
 const UNGATED = ["/grant-access", "/eve"];
 
 const ANONYMOUS = ["/t", "/p"];
@@ -41,7 +45,7 @@ export async function proxy(request: NextRequest) {
 	// trip rather than two, and neither answer can be stale.
 	const [workspace, research] = await Promise.all([
 		readWorkspaceGate(request),
-		readResearchGate(request),
+		RESEARCH_GATE ? readResearchGate(request) : "settled",
 	]);
 
 	if (workspace.gate === "required") return sendTo(ONBOARDING_PATH, request);
@@ -55,8 +59,12 @@ export async function proxy(request: NextRequest) {
 }
 
 function appPath(pathname: string, slug: string): string {
-	if (pathname === LANDING_PATH || isSetup(pathname)) {
-		return workspaceUrl(slug);
+	if (
+		pathname === LANDING_PATH ||
+		pathname === workspaceUrl(slug) ||
+		isSetup(pathname)
+	) {
+		return workspaceUrl(slug, HOME_SECTION);
 	}
 
 	if (SECTIONS.some((section) => isUnder(pathname, section))) {
