@@ -27,10 +27,11 @@ export const metadata: Metadata = {
 	description: "El plano de la campaña antes de tocar el Ads Manager.",
 	icons: {
 		icon: [
-			{ url: "/favicon.svg", type: "image/svg+xml" },
-			{ url: "/favicon-96x96.png", type: "image/png", sizes: "96x96" },
+			{ url: "/brand/favicon.ico", sizes: "48x48" },
+			{ url: "/brand/favicon-96x96.png", type: "image/png", sizes: "96x96" },
+			{ url: "/brand/icon-512.png", type: "image/png", sizes: "512x512" },
 		],
-		apple: "/apple-touch-icon.png",
+		apple: "/brand/apple-touch-icon.png",
 	},
 	manifest: "/site.webmanifest",
 };

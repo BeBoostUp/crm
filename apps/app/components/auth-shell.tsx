@@ -1,7 +1,7 @@
-import Logo from "@crm/ui/components/logo";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { AuthShader } from "@/components/auth-shader";
+import { BrandLogo } from "@/components/brand-logo";
 
 export function AuthShell({ children }: { children: ReactNode }) {
 	return (
@@ -11,7 +11,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
 
 				<div className="relative flex gap-2 text-sm/5">
 					<Link href="/" aria-label="Homepage" className="flex">
-						<Logo className="size-5 shrink-0" />
+						<BrandLogo className="size-8 shrink-0" />
 					</Link>
 				</div>
 
@@ -41,7 +41,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
 
 			<section className="flex min-h-svh flex-col bg-background px-6 py-8 sm:px-10 lg:px-14">
 				<div className="flex gap-2 text-sm/5 max-lg:hidden lg:invisible">
-					<Logo className="size-5 shrink-0" />
+					<BrandLogo className="size-8 shrink-0" />
 				</div>
 
 				<div className="flex flex-1 items-center justify-center py-12">

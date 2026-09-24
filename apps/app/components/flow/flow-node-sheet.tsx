@@ -160,7 +160,7 @@ function NodeField({
 					href={value}
 					target="_blank"
 					rel="noreferrer"
-					className="text-primary text-xs underline-offset-4 hover:underline"
+					className="text-link text-xs underline-offset-4 hover:underline"
 				>
 					<Icon icon={Launch} data-icon="inline-start" />
 					Abrir enlace

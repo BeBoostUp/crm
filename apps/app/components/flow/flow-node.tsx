@@ -35,7 +35,7 @@ function FlowNodeCard({ id, type, data, selected }: NodeProps<FlowRfNode>) {
 			className={cn(
 				"w-60 rounded-md border bg-card text-card-foreground shadow-sm",
 				selected && "ring-2 ring-ring",
-				missing.length > 0 ? "border-destructive/50" : "border-emerald-500/50",
+				missing.length > 0 ? "border-destructive/50" : "border-success/50",
 			)}
 		>
 			<Handle type="target" position={Position.Top} />
@@ -53,7 +53,7 @@ function FlowNodeCard({ id, type, data, selected }: NodeProps<FlowRfNode>) {
 							<span
 								className={cn(
 									"size-2 rounded-full",
-									missing.length > 0 ? "bg-destructive" : "bg-emerald-500",
+									missing.length > 0 ? "bg-destructive" : "bg-success",
 								)}
 							/>
 						</div>

@@ -95,7 +95,7 @@ function FlowAssets({ project }: { project: FlowProject }) {
 										href={asset.url}
 										target="_blank"
 										rel="noreferrer"
-										className="block truncate text-primary text-xs underline-offset-4 hover:underline"
+										className="block truncate text-link text-xs underline-offset-4 hover:underline"
 									>
 										<Icon icon={Launch} data-icon="inline-start" />
 										{asset.url}
