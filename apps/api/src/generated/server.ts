@@ -24,6 +24,7 @@ import { dashboardSummaryInput, dashboardSummaryOutput } from "../dashboard/dash
 import { dealListInput, dealListOutput, dealIdInput, dealDetailOutput, dealCreateInput, dealCreateOutput, dealUpdateArgs, dealMutateOutput, setStageInput, dealSetStageOutput, dealContactsInput, dealContactOptionsOutput, dealAttachContactInput, dealContactLinkOutput, dealDetachContactInput, dealContactRoleInput, dealContactRoleOutput, dealBulkOwnerInput, dealBulkResultOutput, dealBulkStageInput, dealBulkInput } from "../deals/deals.contracts";
 import { enrichmentQueueInput } from "@crm/validation/enrichment-queue";
 import { fieldListInput, fieldListOutput, fieldByKeyInput, serializedFieldOutput, fieldEntityInput, fieldFiltersOutput, fieldIdInput, fieldCoverageOutput, fieldCreateInput, fieldUpdateArgs, fieldReorderInput, fieldReorderOutput, fieldDeleteOutput, fieldBackfillOutput } from "../fields/fields.contracts";
+import { flowProjectListOutput, flowIdInput, flowProjectOutput, flowProjectCreateInput, flowProjectUpdateInput, flowDeleteOutput, flowMemberSetInput, flowMemberRemoveInput, flowCanvasCreateInput, flowCanvasSummaryOutput, flowCanvasOutput, flowCanvasSaveInput, flowCanvasSaveOutput, flowCanvasUpdateInput, flowProjectIdInput, flowGuestLinkOutput, flowGuestTokenInput, flowGuestViewOutput, flowAssetCreateInput, flowAssetOutput, flowAssetUpdateInput, flowChecklistCreateInput, flowChecklistOutput, flowChecklistItemCreateInput, flowChecklistItemUpdateInput } from "../flow/flow.contracts";
 import { googleConnectionStatusOutput, setAutoCreateInput, suppressDomainInput, suppressDomainOutput, threadInput, emailThreadOutput, calendarEventInput, calendarEventOutput } from "../google/google.contracts";
 import { purgeSyncedDataOutput, revokeAccessOutput, microsoftConnectionStatusOutput, setOutlookAutoCreateInput } from "../microsoft/microsoft.contracts";
 import { savedViewListInput, savedViewListOutput, savedViewCreateInput, savedViewOutput, savedViewUpdateArgs, savedViewIdInput, savedViewDeleteOutput } from "../saved-views/saved-views.contracts";
@@ -526,6 +527,99 @@ const appRouter = t.router({
     backfill: publicProcedure
       .input(fieldIdInput)
       .output(fieldBackfillOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any)
+    }),
+  flow: t.router({
+    listProjects: publicProcedure
+      .output(flowProjectListOutput)
+      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    getProject: publicProcedure
+      .input(flowIdInput)
+      .output(flowProjectOutput)
+      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    createProject: publicProcedure
+      .input(flowProjectCreateInput)
+      .output(flowProjectOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    updateProject: publicProcedure
+      .input(flowProjectUpdateInput)
+      .output(flowProjectOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    removeProject: publicProcedure
+      .input(flowIdInput)
+      .output(flowDeleteOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    setMember: publicProcedure
+      .input(flowMemberSetInput)
+      .output(flowProjectOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    removeMember: publicProcedure
+      .input(flowMemberRemoveInput)
+      .output(flowProjectOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    createCanvas: publicProcedure
+      .input(flowCanvasCreateInput)
+      .output(flowCanvasSummaryOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    getCanvas: publicProcedure
+      .input(flowIdInput)
+      .output(flowCanvasOutput)
+      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    saveCanvas: publicProcedure
+      .input(flowCanvasSaveInput)
+      .output(flowCanvasSaveOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    updateCanvas: publicProcedure
+      .input(flowCanvasUpdateInput)
+      .output(flowCanvasSummaryOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    removeCanvas: publicProcedure
+      .input(flowIdInput)
+      .output(flowDeleteOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    createGuestLink: publicProcedure
+      .input(flowProjectIdInput)
+      .output(flowGuestLinkOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    revokeGuestLink: publicProcedure
+      .input(flowProjectIdInput)
+      .output(flowDeleteOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    guestView: publicProcedure
+      .input(flowGuestTokenInput)
+      .output(flowGuestViewOutput)
+      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    createAsset: publicProcedure
+      .input(flowAssetCreateInput)
+      .output(flowAssetOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    updateAsset: publicProcedure
+      .input(flowAssetUpdateInput)
+      .output(flowAssetOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    removeAsset: publicProcedure
+      .input(flowIdInput)
+      .output(flowDeleteOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    createChecklist: publicProcedure
+      .input(flowChecklistCreateInput)
+      .output(flowChecklistOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    removeChecklist: publicProcedure
+      .input(flowIdInput)
+      .output(flowDeleteOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    addChecklistItem: publicProcedure
+      .input(flowChecklistItemCreateInput)
+      .output(flowChecklistOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    updateChecklistItem: publicProcedure
+      .input(flowChecklistItemUpdateInput)
+      .output(flowChecklistOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    removeChecklistItem: publicProcedure
+      .input(flowIdInput)
+      .output(flowChecklistOutput)
       .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any)
     }),
   google: t.router({

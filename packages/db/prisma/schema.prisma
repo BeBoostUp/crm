@@ -23,15 +23,17 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
-  ownedCompanies Company[]           @relation("CompanyOwner")
-  ownedContacts  Contact[]           @relation("ContactOwner")
-  ownedDeals     Deal[]              @relation("DealOwner")
-  activities     Activity[]          @relation("ActivityAuthor")
-  mailboxSyncs   MailboxSync[]
-  factDecisions  ContactFact[]       @relation("FactDecider")
-  conversations  AgentConversation[] @relation("ConversationOwner")
-  fieldValues    FieldValue[]        @relation("FieldValueUser")
-  savedViews     SavedView[]         @relation("SavedViewOwner")
+  ownedCompanies  Company[]           @relation("CompanyOwner")
+  ownedContacts   Contact[]           @relation("ContactOwner")
+  ownedDeals      Deal[]              @relation("DealOwner")
+  activities      Activity[]          @relation("ActivityAuthor")
+  mailboxSyncs    MailboxSync[]
+  factDecisions   ContactFact[]       @relation("FactDecider")
+  conversations   AgentConversation[] @relation("ConversationOwner")
+  fieldValues     FieldValue[]        @relation("FieldValueUser")
+  savedViews      SavedView[]         @relation("SavedViewOwner")
+  flowProjects    FlowProject[]       @relation("FlowProjectCreator")
+  flowMemberships FlowMember[]        @relation("FlowMemberUser")
 
   createdAgentDefinitions AgentDefinition[]             @relation("AgentDefinitionCreator")
   createdAgentVersions    AgentVersion[]                @relation("AgentVersionCreator")
@@ -328,6 +330,7 @@ model Company {
   emailThreads   EmailThread[]
   calendarEvents CalendarEvent[]
   fieldValues    FieldValue[]
+  flowProjects   FlowProject[]
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
 
@@ -1582,4 +1585,131 @@ model Apikey {
   @@index([configId])
   @@index([key])
   @@map("apikey")
+}
+
+enum FlowRole {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum FlowCanvasType {
+  JOURNEY
+  CAMPAIGN
+  MIND
+}
+
+enum FlowAssetKind {
+  AD
+  LANDING
+  EMAIL
+  RESOURCE
+}
+
+model FlowProject {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  color       String?
+
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  createdById String
+  createdBy   User   @relation("FlowProjectCreator", fields: [createdById], references: [id], onDelete: Cascade)
+
+  members    FlowMember[]
+  canvases   FlowCanvas[]
+  guestLinks FlowGuestLink[]
+  assets     FlowAsset[]
+  checklists FlowChecklist[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@map("flowProject")
+}
+
+model FlowMember {
+  projectId String
+  project   FlowProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User        @relation("FlowMemberUser", fields: [userId], references: [id], onDelete: Cascade)
+  role      FlowRole    @default(EDITOR)
+  createdAt DateTime    @default(now())
+
+  @@id([projectId, userId])
+  @@index([userId])
+  @@map("flowMember")
+}
+
+model FlowCanvas {
+  id           String         @id @default(cuid())
+  projectId    String
+  project      FlowProject    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  type         FlowCanvasType
+  name         String
+  channel      String?
+  document     Json
+  completeness Int            @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([projectId, createdAt])
+  @@map("flowCanvas")
+}
+
+model FlowGuestLink {
+  id        String      @id @default(cuid())
+  projectId String
+  project   FlowProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tokenHash String      @unique
+  createdAt DateTime    @default(now())
+  revokedAt DateTime?
+
+  @@unique([projectId], map: "flowGuestLink_one_active_per_project", where: { revokedAt: null })
+  @@map("flowGuestLink")
+}
+
+model FlowAsset {
+  id        String        @id @default(cuid())
+  projectId String
+  project   FlowProject   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  kind      FlowAssetKind
+  title     String
+  url       String?
+  notes     String?
+  tags      String[]      @default([])
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([projectId, createdAt])
+  @@map("flowAsset")
+}
+
+model FlowChecklist {
+  id        String              @id @default(cuid())
+  projectId String
+  project   FlowProject         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title     String
+  items     FlowChecklistItem[]
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  @@index([projectId, createdAt])
+  @@map("flowChecklist")
+}
+
+model FlowChecklistItem {
+  id          String        @id @default(cuid())
+  checklistId String
+  checklist   FlowChecklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+  text        String
+  done        Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([checklistId, createdAt])
+  @@map("flowChecklistItem")
 }

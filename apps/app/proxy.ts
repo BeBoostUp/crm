@@ -16,9 +16,9 @@ const SIGN_IN_PATH = "/sign-in";
 
 const UNGATED = ["/grant-access", "/eve"];
 
-const ANONYMOUS = ["/t"];
+const ANONYMOUS = ["/t", "/p"];
 
-const SECTIONS = ["/companies", "/contacts", "/deals", "/settings"];
+const SECTIONS = ["/companies", "/contacts", "/deals", "/flow", "/settings"];
 
 export async function proxy(request: NextRequest) {
 	const { pathname } = request.nextUrl;

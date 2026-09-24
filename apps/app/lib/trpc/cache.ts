@@ -41,6 +41,7 @@ export type CrmCache = {
 	sso(options?: Options): Promise<void>;
 	apiKeys(options?: Options): Promise<void>;
 	tracking(options?: Options): Promise<void>;
+	flow(options?: Options): Promise<void>;
 	everything(): Promise<void>;
 };
 
@@ -125,6 +126,17 @@ export function useCrmCache(): CrmCache {
 	} as const;
 
 	return {
+		flow: (options) =>
+			run(
+				[
+					trpc.flow.listProjects.queryKey(),
+					trpc.flow.getProject.pathKey(),
+					trpc.flow.getCanvas.pathKey(),
+				],
+				[],
+				options,
+			),
+
 		fields: (entity, options) =>
 			run(
 				[
