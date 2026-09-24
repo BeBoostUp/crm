@@ -15,13 +15,13 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@crm/ui/components/dropdown-menu";
+import Logo from "@crm/ui/components/logo";
 import { Separator } from "@crm/ui/components/separator";
 import { Skeleton } from "@crm/ui/components/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
-import { BrandLogo } from "@/components/brand-logo";
 import { EnrichmentQueue } from "@/components/enrichment-queue";
 import { ProjectSwitcher } from "@/components/flow/project-switcher";
 import { useMobileNav } from "@/components/mobile-nav";
@@ -57,7 +57,7 @@ export function AppHeader({ user }: { user: User }) {
 					aria-label="Homepage"
 					className="hidden size-8 items-center justify-center text-foreground md:flex"
 				>
-					<BrandLogo className="size-7" />
+					<Logo className="size-5" />
 				</Link>
 				<Separator orientation="vertical" className="mx-1 h-5 bg-transparent" />
 				<ProjectSwitcher fallback={label} />
@@ -86,7 +86,7 @@ export function AppHeaderFallback() {
 		>
 			<div className="flex shrink-0 items-center gap-1">
 				<span className="hidden size-8 items-center justify-center text-foreground md:flex">
-					<BrandLogo className="size-7" />
+					<Logo className="size-5" />
 				</span>
 				<Separator orientation="vertical" className="mx-1 h-5 bg-transparent" />
 				<Skeleton className="h-4 w-24" />
