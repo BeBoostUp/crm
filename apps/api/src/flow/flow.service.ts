@@ -31,6 +31,7 @@ import type {
 	FlowProjectUpdateInput,
 	FlowRole,
 } from "./flow.contracts";
+import { FLOW_DEMO_PROJECTS } from "./flow-demo";
 
 const companySelect = { id: true, name: true, logoUrl: true } as const;
 
@@ -516,6 +517,54 @@ export class FlowService {
 		await this.db.flowChecklistItem.delete({ where: { id } });
 
 		return this.readChecklist(item.checklistId);
+	}
+
+	async seedDemo(userId: string): Promise<FlowProjectSummary[]> {
+		for (const demo of FLOW_DEMO_PROJECTS) {
+			const existing = await this.db.flowProject.findFirst({
+				where: { name: demo.name, members: { some: { userId } } },
+				select: { id: true },
+			});
+			if (existing) continue;
+
+			const company =
+				(await this.db.company.findFirst({
+					where: { name: demo.company, archivedAt: null },
+					select: { id: true },
+				})) ??
+				(await this.db.company.create({
+					data: { name: demo.company, ownerId: userId },
+					select: { id: true },
+				}));
+
+			await this.db.flowProject.create({
+				data: {
+					name: demo.name,
+					description: demo.description,
+					companyId: company.id,
+					createdById: userId,
+					members: { create: { userId, role: "ADMIN" } },
+					canvases: {
+						create: demo.canvases.map((canvas) => ({
+							type: canvas.type,
+							name: canvas.name,
+							channel: canvas.channel || null,
+							document: canvas.document,
+							completeness: flowCompleteness(canvas.document),
+						})),
+					},
+					assets: { create: demo.assets },
+					checklists: {
+						create: demo.checklists.map((list) => ({
+							title: list.title,
+							items: { create: list.items },
+						})),
+					},
+				},
+			});
+		}
+
+		return this.listProjects(userId);
 	}
 
 	private async readChecklist(id: string): Promise<FlowChecklist> {

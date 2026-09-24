@@ -90,6 +90,20 @@ describe("FlowService", () => {
 		await expect(service.guestView(token)).rejects.toThrow(/no longer active/);
 	});
 
+	it("seeds the demo projects once", async () => {
+		const first = await service.seedDemo(outsiderId);
+		const second = await service.seedDemo(outsiderId);
+
+		expect(first.length).toBe(2);
+		expect(second.length).toBe(2);
+		expect(first.every((project) => project.role === "ADMIN")).toBe(true);
+		expect(
+			first.find((project) => project.name.startsWith("Acme"))?.completeness,
+		).toBeGreaterThan(0);
+		await db.flowProject.deleteMany({ where: { createdById: outsiderId } });
+		await db.company.deleteMany({ where: { ownerId: outsiderId } });
+	});
+
 	it("keeps viewers out of edits and protects the last admin", async () => {
 		await service.setMember(projectId, outsiderId, "VIEWER", adminId);
 

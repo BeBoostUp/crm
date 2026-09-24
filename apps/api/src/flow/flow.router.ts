@@ -67,6 +67,15 @@ export class FlowRouter {
 	}
 
 	@Mutation({
+		output: flowProjectListOutput,
+		meta: restMeta("POST", "/flow/demo", TAGS),
+	})
+	@UseMiddlewares(AuthMiddleware)
+	async seedDemo(@Ctx() ctx: AuthedTrpcContext) {
+		return this.flow.seedDemo(ctx.user.id);
+	}
+
+	@Mutation({
 		input: flowProjectCreateInput,
 		output: flowProjectOutput,
 		meta: restMeta("POST", "/flow/projects", TAGS),

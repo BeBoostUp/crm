@@ -537,6 +537,9 @@ const appRouter = t.router({
       .input(flowIdInput)
       .output(flowProjectOutput)
       .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    seedDemo: publicProcedure
+      .output(flowProjectListOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     createProject: publicProcedure
       .input(flowProjectCreateInput)
       .output(flowProjectOutput)
