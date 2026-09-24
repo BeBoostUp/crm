@@ -62,7 +62,7 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 				await cache.flow();
 				setName("");
 				setChannel("");
-				toast.success(`Canvas "${canvas.name}" created.`);
+				toast.success(`Lienzo «${canvas.name}» creado.`);
 			},
 			onError: (error) => toast.error(error.message),
 		}),
@@ -93,7 +93,10 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 				<PageShellHeading>
 					<PageShellTitle>{project.name}</PageShellTitle>
 					<PageShellDescription>
-						{[project.company?.name ?? "No client company", project.description]
+						{[
+							project.company?.name ?? "Sin empresa cliente",
+							project.description,
+						]
 							.filter(Boolean)
 							.join(" · ")}
 					</PageShellDescription>
@@ -103,14 +106,14 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 					<Button asChild variant="ghost" size="sm">
 						<Link href={url("/flow")}>
 							<Icon icon={ArrowLeft} data-icon="inline-start" />
-							All projects
+							Todos los proyectos
 						</Link>
 					</Button>
 					<FlowGuestLink project={project} />
 					{project.role === "ADMIN" ? (
 						<ConfirmDelete
-							label="Delete project"
-							description={`"${project.name}" with all its canvases, references and checklists will be gone.`}
+							label="Eliminar proyecto"
+							description={`Se borra «${project.name}» con sus lienzos, referencias y checklists.`}
 							onConfirm={() => removeProject.mutate({ id: project.id })}
 						/>
 					) : null}
@@ -120,10 +123,10 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 			<PageShellContent className="min-h-0 overflow-y-auto">
 				<div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
 					<section className="space-y-3">
-						<h2 className="font-medium text-sm">Canvases</h2>
+						<h2 className="font-medium text-sm">Lienzos</h2>
 						{project.canvases.length === 0 ? (
 							<p className="text-muted-foreground text-sm">
-								No canvases yet. Start with a customer journey.
+								Todavía no hay lienzos. Empezá por un customer journey.
 							</p>
 						) : (
 							<ul className="grid gap-3 sm:grid-cols-2">
@@ -142,7 +145,7 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 											<p className="text-muted-foreground text-xs">
 												{FLOW_CANVAS_LABELS[canvas.type]}
 												{canvas.channel ? ` · ${canvas.channel}` : ""} ·{" "}
-												{canvas.nodeCount} nodes
+												{canvas.nodeCount} nodos
 											</p>
 										</Link>
 										<Badge
@@ -154,8 +157,8 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 										</Badge>
 										{canEdit ? (
 											<ConfirmDelete
-												label="Delete canvas"
-												description={`"${canvas.name}" and every node in it will be gone.`}
+												label="Eliminar lienzo"
+												description={`Se borra «${canvas.name}» con todos sus nodos.`}
 												onConfirm={() => removeCanvas.mutate({ id: canvas.id })}
 											/>
 										) : null}
@@ -178,19 +181,19 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 								}}
 							>
 								<Field>
-									<FieldLabel htmlFor={nameId}>New canvas</FieldLabel>
+									<FieldLabel htmlFor={nameId}>Nuevo lienzo</FieldLabel>
 									<Input
 										id={nameId}
 										value={name}
 										onChange={(event) => setName(event.target.value)}
-										placeholder="Meta · launch funnel"
+										placeholder="Meta · embudo de lanzamiento"
 										maxLength={120}
 										className="w-56"
 										required
 									/>
 								</Field>
 								<Field>
-									<FieldLabel htmlFor={typeId}>Type</FieldLabel>
+									<FieldLabel htmlFor={typeId}>Tipo</FieldLabel>
 									<Select
 										value={type}
 										onValueChange={(value) => setType(value as FlowCanvasType)}
@@ -208,7 +211,7 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 									</Select>
 								</Field>
 								<Field>
-									<FieldLabel htmlFor={channelId}>Channel</FieldLabel>
+									<FieldLabel htmlFor={channelId}>Canal</FieldLabel>
 									<Input
 										id={channelId}
 										value={channel}
@@ -223,7 +226,7 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 									disabled={!name.trim() || createCanvas.isPending}
 								>
 									{createCanvas.isPending ? <Spinner /> : null}
-									Add canvas
+									Agregar lienzo
 								</Button>
 							</form>
 						) : null}

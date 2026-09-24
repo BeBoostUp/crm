@@ -33,13 +33,13 @@ export function ConfirmDelete({
 			</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>
-					<AlertDialogTitle>{label}?</AlertDialogTitle>
+					<AlertDialogTitle>¿{label}?</AlertDialogTitle>
 					<AlertDialogDescription>{description}</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel>Cancel</AlertDialogCancel>
+					<AlertDialogCancel>Cancelar</AlertDialogCancel>
 					<AlertDialogAction variant="destructive" onClick={onConfirm}>
-						Delete
+						Eliminar
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

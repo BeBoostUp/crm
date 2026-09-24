@@ -78,8 +78,8 @@ export function FlowNodeSheet({
 					<SheetDescription>
 						{FLOW_NODE_LABELS[kind]}
 						{missing.length > 0
-							? ` · missing ${missing.join(", ")}`
-							: " · complete"}
+							? ` · falta ${missing.join(", ")}`
+							: " · completo"}
 					</SheetDescription>
 				</SheetHeader>
 
@@ -107,10 +107,10 @@ export function FlowNodeSheet({
 						<>
 							<Button variant="outline" onClick={() => onStep(-1)}>
 								<Icon icon={ChevronLeft} data-icon="inline-start" />
-								Previous
+								Anterior
 							</Button>
 							<Button variant="outline" onClick={() => onStep(1)}>
-								Next
+								Siguiente
 								<Icon icon={ChevronRight} data-icon="inline-end" />
 							</Button>
 						</>
@@ -118,7 +118,7 @@ export function FlowNodeSheet({
 					{canEdit && onDelete && node ? (
 						<Button variant="destructive" onClick={() => onDelete(node.id)}>
 							<Icon icon={TrashCan} data-icon="inline-start" />
-							Delete
+							Eliminar
 						</Button>
 					) : null}
 				</SheetFooter>
@@ -163,7 +163,7 @@ function NodeField({
 					className="text-primary text-xs underline-offset-4 hover:underline"
 				>
 					<Icon icon={Launch} data-icon="inline-start" />
-					Open link
+					Abrir enlace
 				</a>
 			) : null}
 			{preview?.kind === "iframe" ? (
@@ -207,7 +207,7 @@ function NodeInput({
 		return (
 			<Select value={value} onValueChange={onChange}>
 				<SelectTrigger id={id} className="w-full">
-					<SelectValue placeholder="Choose…" />
+					<SelectValue placeholder="Elegir…" />
 				</SelectTrigger>
 				<SelectContent>
 					{field.options?.map((option) => (

@@ -25,7 +25,7 @@ export function FlowGuestView({ data }: { data: GuestData }) {
 					<p className="truncate text-muted-foreground text-xs">
 						{[data.project.companyName, data.project.description]
 							.filter(Boolean)
-							.join(" · ") || "Campaign plan"}
+							.join(" · ") || "Plan de campaña"}
 					</p>
 				</div>
 				{data.canvases.length > 1 ? (
@@ -45,7 +45,7 @@ export function FlowGuestView({ data }: { data: GuestData }) {
 						<Badge
 							variant={canvas.completeness === 100 ? "default" : "outline"}
 						>
-							{canvas.completeness}% complete
+							{canvas.completeness}% completo
 						</Badge>
 						<Button
 							variant="outline"
@@ -80,7 +80,7 @@ export function FlowGuestView({ data }: { data: GuestData }) {
 				</>
 			) : (
 				<p className="p-6 text-muted-foreground text-sm">
-					This plan has no canvases yet.
+					Este plan todavía no tiene lienzos.
 				</p>
 			)}
 		</div>

@@ -87,7 +87,7 @@ describe("FlowService", () => {
 		expect(campaign?.data.strategy).toBeUndefined();
 
 		await service.revokeGuestLink(projectId, adminId);
-		await expect(service.guestView(token)).rejects.toThrow(/no longer active/);
+		await expect(service.guestView(token)).rejects.toThrow(/ya no está activo/);
 	});
 
 	it("seeds the demo projects once", async () => {
@@ -109,9 +109,9 @@ describe("FlowService", () => {
 
 		await expect(
 			service.createChecklist(projectId, "Pre-launch", outsiderId),
-		).rejects.toThrow(/Viewers/);
+		).rejects.toThrow(/solo lectura/);
 		await expect(
 			service.setMember(projectId, adminId, "EDITOR", adminId),
-		).rejects.toThrow(/at least one admin/);
+		).rejects.toThrow(/al menos un admin/);
 	});
 });

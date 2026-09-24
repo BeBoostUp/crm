@@ -29,6 +29,7 @@ import { useMemo } from "react";
 import { AgentBuilderSidebar } from "@/components/agent-builder/agent-builder-sidebar";
 import { usePrefetchSection } from "@/components/crm/section-prefetch";
 import { useMobileNav } from "@/components/mobile-nav";
+import { SHOW_CRM } from "@/lib/show-crm";
 import { useWorkspaceUrl } from "@/lib/use-workspace-url";
 
 type RailItem = {
@@ -39,8 +40,6 @@ type RailItem = {
 	match: "exact" | "prefix";
 	related?: string[];
 };
-
-const SHOW_CRM = false;
 
 const CRM_ITEMS: RailItem[] = [
 	{ title: "Overview", href: "/", icon: Dashboard, match: "exact" },

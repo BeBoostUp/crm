@@ -42,7 +42,7 @@ function FlowNodeCard({ id, type, data, selected }: NodeProps<FlowRfNode>) {
 			<div className="space-y-1 px-3 py-2">
 				{kind === "note" ? (
 					<p className="whitespace-pre-wrap text-sm">
-						{data.label?.trim() || "Empty note"}
+						{data.label?.trim() || "Nota vacía"}
 					</p>
 				) : (
 					<>
@@ -67,7 +67,7 @@ function FlowNodeCard({ id, type, data, selected }: NodeProps<FlowRfNode>) {
 						) : null}
 						{missing.length > 0 ? (
 							<p className="text-destructive text-xs">
-								Missing: {missing.join(", ")}
+								Falta: {missing.join(", ")}
 							</p>
 						) : null}
 					</>

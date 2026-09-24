@@ -27,10 +27,10 @@ type FlowProject = RouterOutputs["flow"]["getProject"];
 type AssetKind = FlowProject["assets"][number]["kind"];
 
 const ASSET_KINDS = {
-	AD: "Ad",
+	AD: "Anuncio",
 	LANDING: "Landing",
 	EMAIL: "Email",
-	RESOURCE: "Resource",
+	RESOURCE: "Recurso",
 } as const satisfies Record<AssetKind, string>;
 
 export function FlowProjectLibrary({ project }: { project: FlowProject }) {
@@ -73,10 +73,10 @@ function FlowAssets({ project }: { project: FlowProject }) {
 
 	return (
 		<section className="space-y-3">
-			<h2 className="font-medium text-sm">Ad library</h2>
+			<h2 className="font-medium text-sm">AdLibrary</h2>
 			{project.assets.length === 0 ? (
 				<p className="text-muted-foreground text-sm">
-					Save competitor ads, landing pages and references here.
+					Guardá acá anuncios de la competencia, landings y referencias.
 				</p>
 			) : (
 				<ul className="space-y-2">
@@ -118,8 +118,8 @@ function FlowAssets({ project }: { project: FlowProject }) {
 							</div>
 							{canEdit ? (
 								<ConfirmDelete
-									label="Delete reference"
-									description={`"${asset.title}" will be removed from the library.`}
+									label="Eliminar referencia"
+									description={`Se quita «${asset.title}» de la biblioteca.`}
 									onConfirm={() => remove.mutate({ id: asset.id })}
 								/>
 							) : null}
@@ -150,7 +150,7 @@ function FlowAssets({ project }: { project: FlowProject }) {
 						value={kind}
 						onValueChange={(value) => setKind(value as AssetKind)}
 					>
-						<SelectTrigger aria-label="Kind">
+						<SelectTrigger aria-label="Tipo">
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>
@@ -164,8 +164,8 @@ function FlowAssets({ project }: { project: FlowProject }) {
 					<Input
 						value={title}
 						onChange={(event) => setTitle(event.target.value)}
-						placeholder="Title"
-						aria-label="Title"
+						placeholder="Título"
+						aria-label="Título"
 						maxLength={120}
 						required
 					/>
@@ -173,27 +173,27 @@ function FlowAssets({ project }: { project: FlowProject }) {
 						value={url}
 						onChange={(event) => setUrl(event.target.value)}
 						placeholder="https://…"
-						aria-label="Link"
+						aria-label="Enlace"
 						className="sm:col-span-2"
 					/>
 					<Input
 						value={notes}
 						onChange={(event) => setNotes(event.target.value)}
-						placeholder="Notes"
-						aria-label="Notes"
+						placeholder="Notas"
+						aria-label="Notas"
 					/>
 					<Input
 						value={tags}
 						onChange={(event) => setTags(event.target.value)}
-						placeholder="Tags, comma separated"
-						aria-label="Tags"
+						placeholder="Etiquetas, separadas por coma"
+						aria-label="Etiquetas"
 					/>
 					<Button
 						type="submit"
 						className="sm:col-span-2"
 						disabled={!title.trim() || create.isPending}
 					>
-						Save reference
+						Guardar referencia
 					</Button>
 				</form>
 			) : null}
@@ -222,7 +222,7 @@ function FlowChecklists({ project }: { project: FlowProject }) {
 			<h2 className="font-medium text-sm">Checklists</h2>
 			{project.checklists.length === 0 ? (
 				<p className="text-muted-foreground text-sm">
-					Pre-campaign, creatives, launch, post-campaign: keep the routine here.
+					Pre-campaña, creativos, lanzamiento, post-campaña: la rutina, acá.
 				</p>
 			) : null}
 			{project.checklists.map((checklist) => (
@@ -244,13 +244,13 @@ function FlowChecklists({ project }: { project: FlowProject }) {
 					<Input
 						value={title}
 						onChange={(event) => setTitle(event.target.value)}
-						placeholder="New checklist, e.g. Pre-launch"
-						aria-label="New checklist"
+						placeholder="Nueva checklist, p. ej. Pre-lanzamiento"
+						aria-label="Nueva checklist"
 						maxLength={120}
 						required
 					/>
 					<Button type="submit" disabled={!title.trim() || create.isPending}>
-						Add
+						Agregar
 					</Button>
 				</form>
 			) : null}
@@ -308,8 +308,8 @@ function FlowChecklist({
 				</span>
 				{canEdit ? (
 					<ConfirmDelete
-						label="Delete checklist"
-						description={`"${checklist.title}" and its items will be gone.`}
+						label="Eliminar checklist"
+						description={`Se borra «${checklist.title}» con sus tareas.`}
 						onConfirm={() => removeChecklist.mutate({ id: checklist.id })}
 					/>
 				) : null}
@@ -338,7 +338,7 @@ function FlowChecklist({
 							<Button
 								variant="ghost"
 								size="icon"
-								aria-label={`Remove ${item.text}`}
+								aria-label={`Quitar ${item.text}`}
 								onClick={() => removeItem.mutate({ id: item.id })}
 							>
 								<Icon icon={Close} />
@@ -358,8 +358,8 @@ function FlowChecklist({
 					<Input
 						value={text}
 						onChange={(event) => setText(event.target.value)}
-						placeholder="Add a task"
-						aria-label="Add a task"
+						placeholder="Agregar una tarea"
+						aria-label="Agregar una tarea"
 						maxLength={500}
 						required
 					/>
@@ -368,7 +368,7 @@ function FlowChecklist({
 						variant="outline"
 						disabled={!text.trim() || addItem.isPending}
 					>
-						Add
+						Agregar
 					</Button>
 				</form>
 			) : null}

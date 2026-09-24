@@ -12,7 +12,7 @@ export const flowCanvasType = z.enum(FLOW_CANVAS_TYPES);
 
 export const flowAssetKind = z.enum(["AD", "LANDING", "EMAIL", "RESOURCE"]);
 
-const name = z.string().trim().min(1, "A name is needed.").max(120);
+const name = z.string().trim().min(1, "Falta el nombre.").max(120);
 
 const longText = z.string().trim().max(4000);
 

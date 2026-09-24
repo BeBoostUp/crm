@@ -14,7 +14,7 @@ export function SampleDataButton() {
 		trpc.flow.seedDemo.mutationOptions({
 			onSuccess: async () => {
 				await cache.flow();
-				toast.success("Sample projects loaded.");
+				toast.success("Proyectos de ejemplo cargados.");
 			},
 			onError: (error) => toast.error(error.message),
 		}),
@@ -27,7 +27,7 @@ export function SampleDataButton() {
 			onClick={() => seed.mutate()}
 		>
 			{seed.isPending ? <Spinner /> : null}
-			Load sample data
+			Cargar datos de ejemplo
 		</Button>
 	);
 }

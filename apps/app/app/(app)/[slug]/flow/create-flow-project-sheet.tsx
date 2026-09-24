@@ -34,7 +34,7 @@ function NewProjectButton(props: ComponentProps<typeof Button>) {
 	return (
 		<Button {...props}>
 			<Icon icon={Add} data-icon="inline-start" />
-			New project
+			Nuevo proyecto
 		</Button>
 	);
 }
@@ -87,10 +87,10 @@ function CreateFlowProjectForm() {
 
 			<SheetContent side="right">
 				<SheetHeader>
-					<SheetTitle>New project</SheetTitle>
+					<SheetTitle>Nuevo proyecto</SheetTitle>
 					<SheetDescription>
-						One project per client or brand. Canvases, references and checklists
-						live inside it.
+						Un proyecto por cliente o marca. Adentro viven los lienzos, las
+						referencias y las checklists.
 					</SheetDescription>
 				</SheetHeader>
 
@@ -108,12 +108,12 @@ function CreateFlowProjectForm() {
 				>
 					<FieldGroup>
 						<Field>
-							<FieldLabel htmlFor={nameId}>Name</FieldLabel>
+							<FieldLabel htmlFor={nameId}>Nombre</FieldLabel>
 							<Input
 								id={nameId}
 								value={name}
 								onChange={(event) => setName(event.target.value)}
-								placeholder="Spring launch · Acme"
+								placeholder="Lanzamiento primavera · Acme"
 								maxLength={120}
 								autoComplete="off"
 								required
@@ -121,22 +121,22 @@ function CreateFlowProjectForm() {
 						</Field>
 
 						<Field>
-							<FieldLabel htmlFor={companyId}>Client company</FieldLabel>
+							<FieldLabel htmlFor={companyId}>Empresa cliente</FieldLabel>
 							<CompanyPicker
 								id={companyId}
 								value={company}
 								onValueChange={setCompany}
-								placeholder="Link a company from the CRM"
+								placeholder="Elegí una empresa"
 							/>
 						</Field>
 
 						<Field>
-							<FieldLabel htmlFor={descriptionId}>Description</FieldLabel>
+							<FieldLabel htmlFor={descriptionId}>Descripción</FieldLabel>
 							<Textarea
 								id={descriptionId}
 								value={description}
 								onChange={(event) => setDescription(event.target.value)}
-								placeholder="What this campaign is about."
+								placeholder="De qué va esta campaña."
 								rows={3}
 								maxLength={2000}
 							/>
@@ -151,10 +151,10 @@ function CreateFlowProjectForm() {
 						disabled={!name.trim() || create.isPending}
 					>
 						{create.isPending ? <Spinner /> : null}
-						Create project
+						Crear proyecto
 					</Button>
 					<SheetClose asChild>
-						<Button variant="outline">Cancel</Button>
+						<Button variant="outline">Cancelar</Button>
 					</SheetClose>
 				</SheetFooter>
 			</SheetContent>

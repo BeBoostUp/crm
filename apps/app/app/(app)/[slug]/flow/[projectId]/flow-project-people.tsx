@@ -39,6 +39,12 @@ const ROLES = [
 	"VIEWER",
 ] as const satisfies readonly FlowRole[];
 
+const ROLE_LABELS = {
+	ADMIN: "Admin",
+	EDITOR: "Editor",
+	VIEWER: "Solo lectura",
+} as const satisfies Record<FlowRole, string>;
+
 function RoleSelect({
 	value,
 	onValueChange,
@@ -51,13 +57,13 @@ function RoleSelect({
 			value={value}
 			onValueChange={(next) => onValueChange(next as FlowRole)}
 		>
-			<SelectTrigger className="w-28" aria-label="Role">
+			<SelectTrigger className="w-32" aria-label="Rol">
 				<SelectValue />
 			</SelectTrigger>
 			<SelectContent>
 				{ROLES.map((role) => (
 					<SelectItem key={role} value={role}>
-						{role.charAt(0) + role.slice(1).toLowerCase()}
+						{ROLE_LABELS[role]}
 					</SelectItem>
 				))}
 			</SelectContent>
@@ -95,7 +101,7 @@ export function FlowProjectPeople({ project }: { project: FlowProject }) {
 
 	return (
 		<section className="space-y-3">
-			<h2 className="font-medium text-sm">People</h2>
+			<h2 className="font-medium text-sm">Equipo</h2>
 			<ul className="space-y-2">
 				{project.members.map((member) => (
 					<li key={member.userId} className="flex items-center gap-2">
@@ -125,7 +131,7 @@ export function FlowProjectPeople({ project }: { project: FlowProject }) {
 								<Button
 									variant="ghost"
 									size="icon"
-									aria-label={`Remove ${member.name}`}
+									aria-label={`Quitar a ${member.name}`}
 									onClick={() =>
 										removeMember.mutate({
 											projectId: project.id,
@@ -137,7 +143,7 @@ export function FlowProjectPeople({ project }: { project: FlowProject }) {
 								</Button>
 							</>
 						) : (
-							<Badge variant="outline">{member.role.toLowerCase()}</Badge>
+							<Badge variant="outline">{ROLE_LABELS[member.role]}</Badge>
 						)}
 					</li>
 				))}
@@ -152,8 +158,8 @@ export function FlowProjectPeople({ project }: { project: FlowProject }) {
 					}}
 				>
 					<Select value={userId} onValueChange={setUserId}>
-						<SelectTrigger className="min-w-40 flex-1" aria-label="Teammate">
-							<SelectValue placeholder="Add a teammate" />
+						<SelectTrigger className="min-w-40 flex-1" aria-label="Integrante">
+							<SelectValue placeholder="Sumar a alguien del equipo" />
 						</SelectTrigger>
 						<SelectContent>
 							{available.map((user) => (
@@ -165,7 +171,7 @@ export function FlowProjectPeople({ project }: { project: FlowProject }) {
 					</Select>
 					<RoleSelect value={role} onValueChange={setRole} />
 					<Button type="submit" disabled={!userId || setMember.isPending}>
-						Add
+						Agregar
 					</Button>
 				</form>
 			) : null}
@@ -191,7 +197,7 @@ export function FlowGuestLink({ project }: { project: FlowProject }) {
 		trpc.flow.revokeGuestLink.mutationOptions({
 			onSuccess: async () => {
 				await cache.flow();
-				toast.success("Client link revoked.");
+				toast.success("Enlace del cliente revocado.");
 			},
 			onError: (error) => toast.error(error.message),
 		}),
@@ -208,7 +214,9 @@ export function FlowGuestLink({ project }: { project: FlowProject }) {
 				onClick={() => create.mutate({ projectId: project.id })}
 			>
 				<Icon icon={Share} data-icon="inline-start" />
-				{project.guestLink.active ? "New client link" : "Share with client"}
+				{project.guestLink.active
+					? "Nuevo enlace para el cliente"
+					: "Compartir con el cliente"}
 			</Button>
 			{project.guestLink.active ? (
 				<Button
@@ -217,7 +225,7 @@ export function FlowGuestLink({ project }: { project: FlowProject }) {
 					disabled={revoke.isPending}
 					onClick={() => revoke.mutate({ projectId: project.id })}
 				>
-					Revoke link
+					Revocar enlace
 				</Button>
 			) : null}
 
@@ -229,22 +237,26 @@ export function FlowGuestLink({ project }: { project: FlowProject }) {
 			>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Client link</DialogTitle>
+						<DialogTitle>Enlace para el cliente</DialogTitle>
 						<DialogDescription>
-							Read-only, no account needed. Internal notes stay hidden. Creating
-							a new link revokes the previous one.
+							Solo lectura, sin cuenta. Las notas internas quedan ocultas. Crear
+							un enlace nuevo revoca el anterior.
 						</DialogDescription>
 					</DialogHeader>
 					<div className="flex gap-2">
-						<Input readOnly value={link ?? ""} aria-label="Client link" />
+						<Input
+							readOnly
+							value={link ?? ""}
+							aria-label="Enlace para el cliente"
+						/>
 						<Button
 							onClick={() => {
 								void navigator.clipboard.writeText(link ?? "");
-								toast.success("Copied.");
+								toast.success("Copiado.");
 							}}
 						>
 							<Icon icon={Copy} data-icon="inline-start" />
-							Copy
+							Copiar
 						</Button>
 					</div>
 				</DialogContent>

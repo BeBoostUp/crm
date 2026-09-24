@@ -24,6 +24,7 @@ import { useTheme } from "next-themes";
 import { toast } from "sonner";
 import { EnrichmentQueue } from "@/components/enrichment-queue";
 import { useMobileNav } from "@/components/mobile-nav";
+import { SHOW_CRM } from "@/lib/show-crm";
 import { signOutAndRedirect } from "@/lib/sign-out";
 import { useTRPC } from "@/lib/trpc/client";
 import { useWorkspaceUrl } from "@/lib/use-workspace-url";
@@ -62,7 +63,7 @@ export function AppHeader({ user }: { user: User }) {
 			</div>
 
 			<div className="ml-auto flex shrink-0 items-center gap-1.5">
-				<EnrichmentQueue />
+				{SHOW_CRM ? <EnrichmentQueue /> : null}
 				<UserMenu
 					user={user}
 					onSignOut={() => {

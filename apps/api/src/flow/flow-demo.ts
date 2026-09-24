@@ -192,7 +192,7 @@ const gymJourney: FlowCanvasDocument = {
 	nodes: [
 		node("c1", "campaign", 300, 0, {
 			name: "Reto 21 días · Enero",
-			objective: "Messages",
+			objective: "Mensajes",
 			budget: "CBO · 30 €/día",
 		}),
 		node("a1", "adset", 300, 200, {

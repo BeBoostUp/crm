@@ -370,7 +370,7 @@ export class FlowService {
 			},
 		});
 		if (!link || link.revokedAt) {
-			throw new NotFoundException("This link is no longer active.");
+			throw new NotFoundException("Este enlace ya no está activo.");
 		}
 
 		return {
@@ -637,19 +637,23 @@ export class FlowService {
 			select: { userId: true },
 		});
 		if (admins.length === 1 && admins[0]?.userId === targetUserId) {
-			throw new ConflictException("A project needs at least one admin.");
+			throw new ConflictException("El proyecto necesita al menos un admin.");
 		}
 	}
 
 	private assertEditor(role: FlowRole): void {
 		if (role === "VIEWER") {
-			throw new ForbiddenException("Viewers cannot edit this project.");
+			throw new ForbiddenException(
+				"Con acceso de solo lectura no se puede editar.",
+			);
 		}
 	}
 
 	private assertAdmin(role: FlowRole): void {
 		if (role !== "ADMIN") {
-			throw new ForbiddenException("Only a project admin can do that.");
+			throw new ForbiddenException(
+				"Solo un admin del proyecto puede hacer eso.",
+			);
 		}
 	}
 
@@ -665,7 +669,7 @@ export class FlowService {
 			cause instanceof PrismaNamespace.PrismaClientKnownRequestError &&
 			cause.code === "P2003"
 		) {
-			return new NotFoundException("That company does not exist.");
+			return new NotFoundException("Esa empresa no existe.");
 		}
 		return cause instanceof Error ? cause : new Error(String(cause));
 	}

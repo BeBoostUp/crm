@@ -18,7 +18,7 @@ import { FlowProjects } from "./flow-projects";
 import { SampleDataButton } from "./sample-data-button";
 
 export const metadata: Metadata = {
-	title: "Flow",
+	title: "Proyectos",
 };
 
 export default function FlowPage() {
@@ -26,10 +26,10 @@ export default function FlowPage() {
 		<PageShell className="min-h-0">
 			<PageShellHeader>
 				<PageShellHeading>
-					<PageShellTitle>Flow</PageShellTitle>
+					<PageShellTitle>FlowAds</PageShellTitle>
 					<PageShellDescription>
-						Plan, review and present a campaign before touching the Ads Manager.
-						One project per client, as many canvases as it needs.
+						Planificá, revisá y presentá la campaña antes de tocar el Ads
+						Manager. Un proyecto por cliente, con los lienzos que necesite.
 					</PageShellDescription>
 				</PageShellHeading>
 

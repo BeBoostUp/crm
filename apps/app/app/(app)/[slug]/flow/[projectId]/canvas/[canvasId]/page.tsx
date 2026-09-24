@@ -7,7 +7,7 @@ import { getServerQueryClient, getServerTrpc } from "@/lib/trpc/server";
 import { FlowCanvasEditor } from "./flow-canvas-editor";
 
 export const metadata: Metadata = {
-	title: "Canvas",
+	title: "Lienzo",
 };
 
 export default function FlowCanvasPage({

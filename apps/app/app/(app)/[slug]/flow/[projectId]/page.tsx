@@ -7,7 +7,7 @@ import { getServerQueryClient, getServerTrpc } from "@/lib/trpc/server";
 import { FlowProjectView } from "./flow-project-view";
 
 export const metadata: Metadata = {
-	title: "Flow project",
+	title: "Proyecto",
 };
 
 export default function FlowProjectPage({

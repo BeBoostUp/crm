@@ -6,7 +6,7 @@ import { getServerTrpcClient } from "@/lib/trpc/server";
 import { FlowGuestView } from "./flow-guest-view";
 
 export const metadata: Metadata = {
-	title: "Campaign plan",
+	title: "Plan de campaña",
 };
 
 export default function GuestPage({ params }: PageProps<"/p/[token]">) {

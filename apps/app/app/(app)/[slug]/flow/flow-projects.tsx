@@ -15,6 +15,12 @@ import Link from "next/link";
 import { useTRPC } from "@/lib/trpc/client";
 import { useWorkspaceUrl } from "@/lib/use-workspace-url";
 
+const ROLE_LABELS = {
+	ADMIN: "admin",
+	EDITOR: "editor",
+	VIEWER: "solo lectura",
+} as const;
+
 export function FlowProjects() {
 	const trpc = useTRPC();
 	const url = useWorkspaceUrl();
@@ -29,10 +35,10 @@ export function FlowProjects() {
 					<EmptyMedia variant="icon">
 						<Icon icon={FlowConnection} />
 					</EmptyMedia>
-					<EmptyTitle>No campaign plans yet</EmptyTitle>
+					<EmptyTitle>Todavía no hay proyectos</EmptyTitle>
 					<EmptyDescription>
-						Create a project for a client and map the funnel: campaign, ad sets,
-						ads and landing pages, all in one canvas.
+						Creá un proyecto para un cliente y dibujá el embudo: campaña,
+						adsets, anuncios y landings, todo en un lienzo.
 					</EmptyDescription>
 				</EmptyHeader>
 			</Empty>
@@ -56,12 +62,12 @@ export function FlowProjects() {
 							</Badge>
 						</div>
 						<p className="mt-1 text-muted-foreground text-sm">
-							{project.company?.name ?? "No client company"}
+							{project.company?.name ?? "Sin empresa cliente"}
 						</p>
 						<p className="mt-3 text-muted-foreground text-xs">
 							{project.canvasCount}{" "}
-							{project.canvasCount === 1 ? "canvas" : "canvases"} ·{" "}
-							{project.role.toLowerCase()}
+							{project.canvasCount === 1 ? "lienzo" : "lienzos"} ·{" "}
+							{ROLE_LABELS[project.role]}
 						</p>
 					</Link>
 				</li>

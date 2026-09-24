@@ -24,10 +24,10 @@ import { useWorkspaceUrl } from "@/lib/use-workspace-url";
 const SAVE_DELAY_MS = 700;
 
 const STATUS_LABEL = {
-	saved: "Saved",
-	pending: "Unsaved changes",
-	saving: "Saving…",
-	error: "Save failed",
+	saved: "Guardado",
+	pending: "Cambios sin guardar",
+	saving: "Guardando…",
+	error: "No se pudo guardar",
 } as const;
 
 type Status = keyof typeof STATUS_LABEL;
@@ -93,7 +93,7 @@ function Editor({ canvas }: { canvas: RouterOutputs["flow"]["getCanvas"] }) {
 				<h1 className="font-medium text-sm">{canvas.name}</h1>
 				<Badge variant="outline">{FLOW_CANVAS_LABELS[canvas.type]}</Badge>
 				<Badge variant={completeness === 100 ? "default" : "outline"}>
-					{completeness}% complete
+					{completeness}% completo
 				</Badge>
 				{canvas.canEdit ? (
 					<span className="text-muted-foreground text-xs">
@@ -111,16 +111,16 @@ function Editor({ canvas }: { canvas: RouterOutputs["flow"]["getCanvas"] }) {
 						>
 							<TabsList>
 								<TabsTrigger value="edit">Editor</TabsTrigger>
-								<TabsTrigger value="present">Presentation</TabsTrigger>
+								<TabsTrigger value="present">Presentación</TabsTrigger>
 							</TabsList>
 						</Tabs>
 					) : null}
 					<Button variant="outline" size="sm" onClick={() => print(false)}>
 						<Icon icon={Printer} data-icon="inline-start" />
-						Client PDF
+						PDF cliente
 					</Button>
 					<Button variant="outline" size="sm" onClick={() => print(true)}>
-						Internal PDF
+						PDF interno
 					</Button>
 				</div>
 			</div>
