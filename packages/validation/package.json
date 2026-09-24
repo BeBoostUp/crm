@@ -15,7 +15,8 @@
 		"./field-backfill": "./src/field-backfill.ts",
 		"./field-templates": "./src/field-templates.ts",
 		"./saved-view": "./src/saved-view.ts",
-		"./flow-canvas": "./src/flow-canvas.ts"
+		"./flow-canvas": "./src/flow-canvas.ts",
+		"./flow-permissions": "./src/flow-permissions.ts"
 	},
 	"scripts": {
 		"check-types": "tsc --noEmit",

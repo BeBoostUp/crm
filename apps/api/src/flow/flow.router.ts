@@ -12,7 +12,6 @@ import type { AuthedTrpcContext } from "../trpc/context.types";
 import { AuthMiddleware } from "../trpc/middlewares/auth.middleware";
 import { restMeta } from "../trpc/openapi";
 import {
-	type FlowRole,
 	flowAssetCreateInput,
 	flowAssetOutput,
 	flowAssetUpdateInput,
@@ -23,11 +22,21 @@ import {
 	flowCanvasSummaryOutput,
 	flowCanvasThumbnailInput,
 	flowCanvasUpdateInput,
+	flowChatChannelListOutput,
+	flowChatMessageListOutput,
+	flowChatMessageOutput,
+	flowChatMessagesInput,
+	flowChatSendInput,
 	flowChecklistCreateInput,
 	flowChecklistItemCreateInput,
 	flowChecklistItemUpdateInput,
 	flowChecklistOutput,
+	flowChecklistReorderInput,
+	flowChecklistsReorderInput,
 	flowDeleteOutput,
+	flowGuestCommentInput,
+	flowGuestCommentOutput,
+	flowGuestLinkCreateInput,
 	flowGuestLinkOutput,
 	flowGuestTokenInput,
 	flowGuestViewOutput,
@@ -57,6 +66,15 @@ export class FlowRouter {
 		return this.flow.listProjects(ctx.user.id);
 	}
 
+	@Mutation({
+		output: flowProjectListOutput,
+		meta: restMeta("POST", "/flow/demo", TAGS),
+	})
+	@UseMiddlewares(AuthMiddleware)
+	async seedDemo(@Ctx() ctx: AuthedTrpcContext) {
+		return this.flow.seedDemo(ctx.user.id);
+	}
+
 	@Query({
 		input: flowIdInput,
 		output: flowProjectOutput,
@@ -65,15 +83,6 @@ export class FlowRouter {
 	@UseMiddlewares(AuthMiddleware)
 	async getProject(@Ctx() ctx: AuthedTrpcContext, @Input("id") id: string) {
 		return this.flow.getProject(id, ctx.user.id);
-	}
-
-	@Mutation({
-		output: flowProjectListOutput,
-		meta: restMeta("POST", "/flow/demo", TAGS),
-	})
-	@UseMiddlewares(AuthMiddleware)
-	async seedDemo(@Ctx() ctx: AuthedTrpcContext) {
-		return this.flow.seedDemo(ctx.user.id);
 	}
 
 	@Mutation({
@@ -120,11 +129,9 @@ export class FlowRouter {
 	@UseMiddlewares(AuthMiddleware)
 	async setMember(
 		@Ctx() ctx: AuthedTrpcContext,
-		@Input("projectId") projectId: string,
-		@Input("userId") userId: string,
-		@Input("role") role: FlowRole,
+		@Input() input: z.infer<typeof flowMemberSetInput>,
 	) {
-		return this.flow.setMember(projectId, userId, role, ctx.user.id);
+		return this.flow.setMember(input, ctx.user.id);
 	}
 
 	@Mutation({
@@ -222,16 +229,20 @@ export class FlowRouter {
 	}
 
 	@Mutation({
-		input: flowProjectIdInput,
+		input: flowGuestLinkCreateInput,
 		output: flowGuestLinkOutput,
 		meta: restMeta("POST", "/flow/projects/{projectId}/guest-link", TAGS),
 	})
 	@UseMiddlewares(AuthMiddleware)
 	async createGuestLink(
 		@Ctx() ctx: AuthedTrpcContext,
-		@Input("projectId") projectId: string,
+		@Input() input: z.infer<typeof flowGuestLinkCreateInput>,
 	) {
-		return this.flow.createGuestLink(projectId, ctx.user.id);
+		return this.flow.createGuestLink(
+			input.projectId,
+			input.canComment,
+			ctx.user.id,
+		);
 	}
 
 	@Mutation({
@@ -254,6 +265,69 @@ export class FlowRouter {
 	})
 	async guestView(@Input("token") token: string) {
 		return this.flow.guestView(token);
+	}
+
+	@Mutation({
+		input: flowGuestCommentInput,
+		output: flowGuestCommentOutput,
+		meta: restMeta("POST", "/flow/guest/{token}/comments", TAGS, {
+			protect: false,
+		}),
+	})
+	async guestComment(@Input() input: z.infer<typeof flowGuestCommentInput>) {
+		return this.flow.guestComment(input);
+	}
+
+	@Mutation({
+		input: flowIdInput,
+		output: flowDeleteOutput,
+		meta: restMeta("DELETE", "/flow/comments/{id}", TAGS),
+	})
+	@UseMiddlewares(AuthMiddleware)
+	async removeGuestComment(
+		@Ctx() ctx: AuthedTrpcContext,
+		@Input("id") id: string,
+	) {
+		return this.flow.removeGuestComment(id, ctx.user.id);
+	}
+
+	@Query({
+		input: flowProjectIdInput,
+		output: flowChatChannelListOutput,
+		meta: restMeta("GET", "/flow/projects/{projectId}/channels", TAGS),
+	})
+	@UseMiddlewares(AuthMiddleware)
+	async chatChannels(
+		@Ctx() ctx: AuthedTrpcContext,
+		@Input("projectId") projectId: string,
+	) {
+		return this.flow.chatChannels(projectId, ctx.user.id);
+	}
+
+	@Query({
+		input: flowChatMessagesInput,
+		output: flowChatMessageListOutput,
+		meta: restMeta("GET", "/flow/channels/{channelId}/messages", TAGS),
+	})
+	@UseMiddlewares(AuthMiddleware)
+	async chatMessages(
+		@Ctx() ctx: AuthedTrpcContext,
+		@Input() input: z.infer<typeof flowChatMessagesInput>,
+	) {
+		return this.flow.chatMessages(input.channelId, input.after, ctx.user.id);
+	}
+
+	@Mutation({
+		input: flowChatSendInput,
+		output: flowChatMessageOutput,
+		meta: restMeta("POST", "/flow/channels/{channelId}/messages", TAGS),
+	})
+	@UseMiddlewares(AuthMiddleware)
+	async chatSend(
+		@Ctx() ctx: AuthedTrpcContext,
+		@Input() input: z.infer<typeof flowChatSendInput>,
+	) {
+		return this.flow.chatSend(input, ctx.user.id);
 	}
 
 	@Mutation({
@@ -320,6 +394,19 @@ export class FlowRouter {
 	}
 
 	@Mutation({
+		input: flowChecklistsReorderInput,
+		output: flowDeleteOutput,
+		meta: restMeta("PUT", "/flow/projects/{projectId}/checklists/order", TAGS),
+	})
+	@UseMiddlewares(AuthMiddleware)
+	async reorderChecklists(
+		@Ctx() ctx: AuthedTrpcContext,
+		@Input() input: z.infer<typeof flowChecklistsReorderInput>,
+	) {
+		return this.flow.reorderChecklists(input.projectId, input.ids, ctx.user.id);
+	}
+
+	@Mutation({
 		input: flowChecklistItemCreateInput,
 		output: flowChecklistOutput,
 		meta: restMeta("POST", "/flow/checklists/{checklistId}/items", TAGS),
@@ -327,10 +414,26 @@ export class FlowRouter {
 	@UseMiddlewares(AuthMiddleware)
 	async addChecklistItem(
 		@Ctx() ctx: AuthedTrpcContext,
-		@Input("checklistId") checklistId: string,
-		@Input("text") text: string,
+		@Input() input: z.infer<typeof flowChecklistItemCreateInput>,
 	) {
-		return this.flow.addChecklistItem(checklistId, text, ctx.user.id);
+		return this.flow.addChecklistItem(input, ctx.user.id);
+	}
+
+	@Mutation({
+		input: flowChecklistReorderInput,
+		output: flowChecklistOutput,
+		meta: restMeta("PUT", "/flow/checklists/{checklistId}/order", TAGS),
+	})
+	@UseMiddlewares(AuthMiddleware)
+	async reorderChecklistItems(
+		@Ctx() ctx: AuthedTrpcContext,
+		@Input() input: z.infer<typeof flowChecklistReorderInput>,
+	) {
+		return this.flow.reorderChecklistItems(
+			input.checklistId,
+			input.ids,
+			ctx.user.id,
+		);
 	}
 
 	@Mutation({

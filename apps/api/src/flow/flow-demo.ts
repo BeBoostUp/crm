@@ -35,7 +35,7 @@ export type DemoProject = {
 	checklists: DemoChecklist[];
 };
 
-function node(
+export function node(
 	id: string,
 	type: FlowNodeKind,
 	x: number,
@@ -45,7 +45,7 @@ function node(
 	return { id, type, position: { x, y }, data };
 }
 
-function edge(source: string, target: string): FlowEdge {
+export function edge(source: string, target: string): FlowEdge {
 	return { id: `${source}-${target}`, source, target };
 }
 

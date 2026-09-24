@@ -38,8 +38,19 @@ import {
 import { useCrmCache } from "@/lib/trpc/cache";
 import { useTRPC } from "@/lib/trpc/client";
 import { useWorkspaceUrl } from "@/lib/use-workspace-url";
+import { FlowProjectChat } from "./flow-project-chat";
+import { FlowProjectComments } from "./flow-project-comments";
 import { FlowProjectLibrary } from "./flow-project-library";
 import { FlowGuestLink, FlowProjectPeople } from "./flow-project-people";
+
+const TEMPLATE_LABELS = {
+	NONE: "Lienzo vacío",
+	LEADS: "Captación de leads",
+	ECOMMERCE: "E-commerce",
+	WEBINAR: "Webinar / lanzamiento",
+} as const;
+
+type FlowTemplate = keyof typeof TEMPLATE_LABELS;
 
 export function FlowProjectView({ projectId }: { projectId: string }) {
 	const trpc = useTRPC();
@@ -49,6 +60,7 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 	const nameId = useId();
 	const typeId = useId();
 	const channelId = useId();
+	const templateId = useId();
 	const logoInput = useRef<HTMLInputElement>(null);
 
 	const { data: project } = useQuery(
@@ -57,6 +69,7 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 	const [name, setName] = useState("");
 	const [type, setType] = useState<FlowCanvasType>("JOURNEY");
 	const [channel, setChannel] = useState("");
+	const [template, setTemplate] = useState<FlowTemplate>("NONE");
 
 	const createCanvas = useMutation(
 		trpc.flow.createCanvas.mutationOptions({
@@ -248,6 +261,7 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 										type,
 										name: name.trim(),
 										channel: channel.trim(),
+										template: template === "NONE" ? null : template,
 									});
 								}}
 							>
@@ -292,6 +306,26 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 										className="w-36"
 									/>
 								</Field>
+								<Field>
+									<FieldLabel htmlFor={templateId}>Plantilla</FieldLabel>
+									<Select
+										value={template}
+										onValueChange={(value) =>
+											setTemplate(value as FlowTemplate)
+										}
+									>
+										<SelectTrigger id={templateId} className="w-48">
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											{Object.entries(TEMPLATE_LABELS).map(([value, label]) => (
+												<SelectItem key={value} value={value}>
+													{label}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+								</Field>
 								<Button
 									type="submit"
 									disabled={!name.trim() || createCanvas.isPending}
@@ -307,6 +341,8 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 				</div>
 
 				<FlowProjectLibrary project={project} />
+				<FlowProjectComments project={project} />
+				<FlowProjectChat project={project} />
 			</PageShellContent>
 		</PageShell>
 	);

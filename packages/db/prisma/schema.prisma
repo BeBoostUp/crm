@@ -23,17 +23,18 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
-  ownedCompanies  Company[]           @relation("CompanyOwner")
-  ownedContacts   Contact[]           @relation("ContactOwner")
-  ownedDeals      Deal[]              @relation("DealOwner")
-  activities      Activity[]          @relation("ActivityAuthor")
-  mailboxSyncs    MailboxSync[]
-  factDecisions   ContactFact[]       @relation("FactDecider")
-  conversations   AgentConversation[] @relation("ConversationOwner")
-  fieldValues     FieldValue[]        @relation("FieldValueUser")
-  savedViews      SavedView[]         @relation("SavedViewOwner")
-  flowProjects    FlowProject[]       @relation("FlowProjectCreator")
-  flowMemberships FlowMember[]        @relation("FlowMemberUser")
+  ownedCompanies   Company[]           @relation("CompanyOwner")
+  ownedContacts    Contact[]           @relation("ContactOwner")
+  ownedDeals       Deal[]              @relation("DealOwner")
+  activities       Activity[]          @relation("ActivityAuthor")
+  mailboxSyncs     MailboxSync[]
+  factDecisions    ContactFact[]       @relation("FactDecider")
+  conversations    AgentConversation[] @relation("ConversationOwner")
+  fieldValues      FieldValue[]        @relation("FieldValueUser")
+  savedViews       SavedView[]         @relation("SavedViewOwner")
+  flowProjects     FlowProject[]       @relation("FlowProjectCreator")
+  flowMemberships  FlowMember[]        @relation("FlowMemberUser")
+  flowChatMessages FlowChatMessage[]   @relation("FlowChatAuthor")
 
   createdAgentDefinitions AgentDefinition[]             @relation("AgentDefinitionCreator")
   createdAgentVersions    AgentVersion[]                @relation("AgentVersionCreator")
@@ -1597,6 +1598,7 @@ enum FlowCanvasType {
   JOURNEY
   CAMPAIGN
   MIND
+  EMAIL
 }
 
 enum FlowAssetKind {
@@ -1624,6 +1626,8 @@ model FlowProject {
   guestLinks FlowGuestLink[]
   assets     FlowAsset[]
   checklists FlowChecklist[]
+  comments   FlowGuestComment[]
+  channels   FlowChatChannel[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1633,12 +1637,13 @@ model FlowProject {
 }
 
 model FlowMember {
-  projectId String
-  project   FlowProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User        @relation("FlowMemberUser", fields: [userId], references: [id], onDelete: Cascade)
-  role      FlowRole    @default(EDITOR)
-  createdAt DateTime    @default(now())
+  projectId   String
+  project     FlowProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User        @relation("FlowMemberUser", fields: [userId], references: [id], onDelete: Cascade)
+  role        FlowRole    @default(EDITOR)
+  permissions Json?
+  createdAt   DateTime    @default(now())
 
   @@id([projectId, userId])
   @@index([userId])
@@ -1663,12 +1668,13 @@ model FlowCanvas {
 }
 
 model FlowGuestLink {
-  id        String      @id @default(cuid())
-  projectId String
-  project   FlowProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  tokenHash String      @unique
-  createdAt DateTime    @default(now())
-  revokedAt DateTime?
+  id         String      @id @default(cuid())
+  projectId  String
+  project    FlowProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tokenHash  String      @unique
+  canComment Boolean     @default(false)
+  createdAt  DateTime    @default(now())
+  revokedAt  DateTime?
 
   @@unique([projectId], map: "flowGuestLink_one_active_per_project", where: { revokedAt: null })
   @@map("flowGuestLink")
@@ -1698,6 +1704,7 @@ model FlowChecklist {
   projectId String
   project   FlowProject         @relation(fields: [projectId], references: [id], onDelete: Cascade)
   title     String
+  position  Int                 @default(0)
   items     FlowChecklistItem[]
   createdAt DateTime            @default(now())
   updatedAt DateTime            @updatedAt
@@ -1712,9 +1719,60 @@ model FlowChecklistItem {
   checklist   FlowChecklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
   text        String
   done        Boolean       @default(false)
+  position    Int           @default(0)
+  parentId    String?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
   @@index([checklistId, createdAt])
   @@map("flowChecklistItem")
+}
+
+enum FlowChatChannelKey {
+  GENERAL
+  INTERNAL
+  CREATIVE
+  CLIENT
+}
+
+model FlowGuestComment {
+  id         String      @id @default(cuid())
+  projectId  String
+  project    FlowProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  canvasId   String?
+  nodeId     String?
+  authorName String
+  body       String
+  createdAt  DateTime    @default(now())
+
+  @@index([projectId, createdAt])
+  @@map("flowGuestComment")
+}
+
+model FlowChatChannel {
+  id        String             @id @default(cuid())
+  projectId String
+  project   FlowProject        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  key       FlowChatChannelKey
+  messages  FlowChatMessage[]
+  createdAt DateTime           @default(now())
+
+  @@unique([projectId, key])
+  @@map("flowChatChannel")
+}
+
+model FlowChatMessage {
+  id        String          @id @default(cuid())
+  channelId String
+  channel   FlowChatChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User            @relation("FlowChatAuthor", fields: [userId], references: [id], onDelete: Cascade)
+  body      String
+  fileUrl   String?
+  fileType  String?
+  fileName  String?
+  createdAt DateTime        @default(now())
+
+  @@index([channelId, createdAt])
+  @@map("flowChatMessage")
 }

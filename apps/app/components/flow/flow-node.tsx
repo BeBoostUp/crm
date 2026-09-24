@@ -1,9 +1,11 @@
 "use client";
 
+import { Badge } from "@crm/ui/components/badge";
 import { cn } from "@crm/ui/lib/utils";
 import {
 	FLOW_NODE_LABELS,
 	type FlowNodeKind,
+	flowNodeAutoTags,
 	flowNodeMissing,
 	flowNodeTitle,
 } from "@crm/validation/flow-canvas";
@@ -18,6 +20,7 @@ import type { FlowRfNode } from "./flow-document";
 const SUBTITLE_KEY = {
 	campaign: "objective",
 	adset: "audience",
+	adgroup: "keywords",
 	ad: "copy",
 	landing: "url",
 	email: "copy",
@@ -28,6 +31,7 @@ function FlowNodeCard({ id, type, data, selected }: NodeProps<FlowRfNode>) {
 	const kind: FlowNodeKind = type ?? "note";
 	const node = { id, type: kind, position: { x: 0, y: 0 }, data };
 	const missing = flowNodeMissing(node);
+	const autoTags = flowNodeAutoTags(node);
 	const subtitle = data[SUBTITLE_KEY[kind]] ?? "";
 
 	return (
@@ -50,12 +54,19 @@ function FlowNodeCard({ id, type, data, selected }: NodeProps<FlowRfNode>) {
 							<span className="font-medium text-[10px] text-muted-foreground uppercase tracking-wide">
 								{FLOW_NODE_LABELS[kind]}
 							</span>
-							<span
-								className={cn(
-									"size-2 rounded-full",
-									missing.length > 0 ? "bg-destructive" : "bg-success",
-								)}
-							/>
+							<span className="flex items-center gap-1">
+								{autoTags.map((tag) => (
+									<Badge key={tag} variant="mono">
+										{tag}
+									</Badge>
+								))}
+								<span
+									className={cn(
+										"size-2 rounded-full",
+										missing.length > 0 ? "bg-destructive" : "bg-success",
+									)}
+								/>
+							</span>
 						</div>
 						<p className="truncate font-medium text-sm">
 							{flowNodeTitle(node)}
@@ -81,6 +92,7 @@ function FlowNodeCard({ id, type, data, selected }: NodeProps<FlowRfNode>) {
 export const flowNodeTypes: NodeTypes = {
 	campaign: FlowNodeCard,
 	adset: FlowNodeCard,
+	adgroup: FlowNodeCard,
 	ad: FlowNodeCard,
 	landing: FlowNodeCard,
 	email: FlowNodeCard,

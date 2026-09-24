@@ -65,6 +65,7 @@ type Props = {
 	canEdit: boolean;
 	presentation: boolean;
 	hideInternal?: boolean;
+	cinematic?: boolean;
 	onDocumentChange?: (document: FlowCanvasDocument) => void;
 	ref?: Ref<FlowBoardHandle>;
 };
@@ -83,6 +84,7 @@ function Board({
 	canEdit,
 	presentation,
 	hideInternal,
+	cinematic = false,
 	onDocumentChange,
 	ref,
 }: Props) {
@@ -193,12 +195,31 @@ function Board({
 	};
 
 	const selected = nodes.find((node) => node.id === selectedId) ?? null;
+	const dim = cinematic && presentation && selectedId !== null;
+	const displayNodes = dim
+		? nodes.map((node) => ({
+				...node,
+				style: {
+					opacity: node.id === selectedId ? 1 : 0.2,
+					transition: "opacity 300ms",
+				},
+			}))
+		: nodes;
+	const displayEdges = dim
+		? edges.map((edge) => ({
+				...edge,
+				style: {
+					opacity:
+						edge.source === selectedId || edge.target === selectedId ? 1 : 0.15,
+				},
+			}))
+		: edges;
 
 	return (
 		<div className="relative h-full min-h-0 w-full">
 			<ReactFlow
-				nodes={nodes}
-				edges={edges}
+				nodes={displayNodes}
+				edges={displayEdges}
 				nodeTypes={flowNodeTypes}
 				onNodesChange={onNodesChange}
 				onEdgesChange={onEdgesChange}

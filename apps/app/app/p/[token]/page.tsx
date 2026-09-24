@@ -22,7 +22,7 @@ async function Guest({ params }: Pick<PageProps<"/p/[token]">, "params">) {
 
 	try {
 		const data = await getServerTrpcClient().flow.guestView.query({ token });
-		return <FlowGuestView data={data} />;
+		return <FlowGuestView data={data} token={token} />;
 	} catch (error) {
 		unstable_rethrow(error);
 		notFound();

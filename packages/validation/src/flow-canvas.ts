@@ -1,13 +1,19 @@
 import { z } from "zod";
 import { parse } from "./index";
 
-export const FLOW_CANVAS_TYPES = ["JOURNEY", "CAMPAIGN", "MIND"] as const;
+export const FLOW_CANVAS_TYPES = [
+	"JOURNEY",
+	"CAMPAIGN",
+	"MIND",
+	"EMAIL",
+] as const;
 
 export type FlowCanvasType = (typeof FLOW_CANVAS_TYPES)[number];
 
 export const FLOW_NODE_KINDS = [
 	"campaign",
 	"adset",
+	"adgroup",
 	"ad",
 	"landing",
 	"email",
@@ -123,6 +129,35 @@ export const FLOW_NODE_FIELDS = {
 		{ key: "budgetType", label: "Tipo (CBO / ABO)", kind: "text" },
 		{ key: "notes", label: "Nota interna", kind: "textarea", internal: true },
 	],
+	adgroup: [
+		{
+			key: "name",
+			label: "Nombre del grupo de anuncios",
+			kind: "text",
+			required: true,
+		},
+		{
+			key: "keywords",
+			label: "Palabras clave",
+			kind: "textarea",
+			required: true,
+			placeholder: 'una por línea · [exacta] "frase" amplia',
+		},
+		{
+			key: "matchType",
+			label: "Concordancia",
+			kind: "text",
+			placeholder: "Exacta, frase, amplia",
+		},
+		{
+			key: "bid",
+			label: "Puja / CPA objetivo",
+			kind: "text",
+			placeholder: "CPA 20 €",
+		},
+		{ key: "negatives", label: "Negativas", kind: "textarea" },
+		{ key: "notes", label: "Nota interna", kind: "textarea", internal: true },
+	],
 	ad: [
 		{ key: "name", label: "Nombre del anuncio", kind: "text", required: true },
 		{
@@ -165,6 +200,7 @@ export const FLOW_NODE_FIELDS = {
 export const FLOW_NODE_LABELS = {
 	campaign: "Campaña",
 	adset: "Adset",
+	adgroup: "Grupo de anuncios",
 	ad: "Anuncio",
 	landing: "Landing",
 	email: "Email",
@@ -172,15 +208,17 @@ export const FLOW_NODE_LABELS = {
 } as const satisfies Record<FlowNodeKind, string>;
 
 export const FLOW_CANVAS_NODE_KINDS = {
-	JOURNEY: ["campaign", "adset", "ad", "landing", "email"],
-	CAMPAIGN: ["campaign", "adset"],
+	JOURNEY: ["campaign", "adset", "adgroup", "ad", "landing", "email", "note"],
+	CAMPAIGN: ["campaign", "adset", "adgroup", "note"],
 	MIND: ["note"],
+	EMAIL: ["email", "landing", "note"],
 } as const satisfies Record<FlowCanvasType, readonly FlowNodeKind[]>;
 
 export const FLOW_CANVAS_LABELS = {
 	JOURNEY: "Customer journey",
 	CAMPAIGN: "Mapa de campañas",
 	MIND: "Mapa mental",
+	EMAIL: "Mapa de emails",
 } as const satisfies Record<FlowCanvasType, string>;
 
 export function flowNodeFields(kind: FlowNodeKind): readonly FlowField[] {
@@ -226,4 +264,16 @@ export function stripFlowInternalFields(
 			};
 		}),
 	};
+}
+
+const AUTO_TAG_PATTERNS = [
+	{ tag: "CBO", pattern: /\bCBO\b/i },
+	{ tag: "ABO", pattern: /\bABO\b/i },
+] as const;
+
+export function flowNodeAutoTags(node: FlowNode): string[] {
+	const text = Object.values(node.data).join(" ");
+	return AUTO_TAG_PATTERNS.filter(({ pattern }) => pattern.test(text)).map(
+		({ tag }) => tag,
+	);
 }

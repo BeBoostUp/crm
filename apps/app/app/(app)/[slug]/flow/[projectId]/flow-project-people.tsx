@@ -2,9 +2,11 @@
 
 import Close from "@carbon/icons-react/es/Close";
 import Copy from "@carbon/icons-react/es/Copy";
+import Settings from "@carbon/icons-react/es/Settings";
 import Share from "@carbon/icons-react/es/Share";
 import { Badge } from "@crm/ui/components/badge";
 import { Button } from "@crm/ui/components/button";
+import { Checkbox } from "@crm/ui/components/checkbox";
 import {
 	Dialog,
 	DialogContent,
@@ -12,6 +14,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@crm/ui/components/dialog";
+import { Field, FieldGroup, FieldLabel } from "@crm/ui/components/field";
 import { Icon } from "@crm/ui/components/icon";
 import { Input } from "@crm/ui/components/input";
 import { PersonAvatar } from "@crm/ui/components/person-avatar";
@@ -22,14 +25,31 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@crm/ui/components/select";
+import {
+	Sheet,
+	SheetContent,
+	SheetDescription,
+	SheetFooter,
+	SheetHeader,
+	SheetTitle,
+} from "@crm/ui/components/sheet";
+import {
+	FLOW_CHANNEL_KEYS,
+	FLOW_CHANNEL_LABELS,
+	type FlowCanvasAccess,
+	type FlowChannelKey,
+	type FlowMemberPermissions,
+} from "@crm/validation/flow-permissions";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { toast } from "sonner";
 import { useCrmCache } from "@/lib/trpc/cache";
 import { useTRPC } from "@/lib/trpc/client";
 import type { RouterOutputs } from "@/lib/trpc/types";
 
 type FlowProject = RouterOutputs["flow"]["getProject"];
+
+type FlowMember = FlowProject["members"][number];
 
 type FlowRole = FlowProject["role"];
 
@@ -44,6 +64,33 @@ const ROLE_LABELS = {
 	EDITOR: "Editor",
 	VIEWER: "Solo lectura",
 } as const satisfies Record<FlowRole, string>;
+
+const ACCESS_LABELS = {
+	inherit: "Según el rol",
+	edit: "Editar",
+	view: "Solo ver",
+	none: "Sin acceso",
+} as const;
+
+type AccessChoice = keyof typeof ACCESS_LABELS;
+
+const TRISTATE = {
+	inherit: "Según el rol",
+	yes: "Sí",
+	no: "No",
+} as const;
+
+type Tristate = keyof typeof TRISTATE;
+
+function toTristate(value: boolean | null): Tristate {
+	if (value === null) return "inherit";
+	return value ? "yes" : "no";
+}
+
+function fromTristate(value: Tristate): boolean | null {
+	if (value === "inherit") return null;
+	return value === "yes";
+}
 
 function RoleSelect({
 	value,
@@ -71,12 +118,212 @@ function RoleSelect({
 	);
 }
 
+function MemberPermissionsSheet({
+	project,
+	member,
+	onClose,
+}: {
+	project: FlowProject;
+	member: FlowMember | null;
+	onClose: () => void;
+}) {
+	const trpc = useTRPC();
+	const cache = useCrmCache();
+	const prefix = useId();
+	const [draft, setDraft] = useState<FlowMemberPermissions | null>(null);
+	const permissions = draft ?? member?.permissions ?? null;
+
+	const save = useMutation(
+		trpc.flow.setMember.mutationOptions({
+			onSuccess: async () => {
+				await cache.flow();
+				toast.success("Permisos guardados.");
+				setDraft(null);
+				onClose();
+			},
+			onError: (error) => toast.error(error.message),
+		}),
+	);
+
+	const update = (next: Partial<FlowMemberPermissions>): void => {
+		if (!permissions) return;
+		setDraft({ ...permissions, ...next });
+	};
+
+	const allChannels = permissions?.channels === null;
+
+	return (
+		<Sheet
+			open={member !== null}
+			onOpenChange={(open) => {
+				if (!open) {
+					setDraft(null);
+					onClose();
+				}
+			}}
+		>
+			<SheetContent side="right">
+				<SheetHeader>
+					<SheetTitle>Permisos de {member?.name}</SheetTitle>
+					<SheetDescription>
+						Qué puede ver y hacer en este proyecto. «Según el rol» usa lo que
+						corresponde a {member ? ROLE_LABELS[member.role] : ""}.
+					</SheetDescription>
+				</SheetHeader>
+
+				{member && permissions ? (
+					<div className="flex-1 space-y-6 overflow-y-auto px-4">
+						<FieldGroup>
+							<p className="font-medium text-sm">Lienzos</p>
+							{project.canvases.map((canvas) => {
+								const id = `${prefix}-canvas-${canvas.id}`;
+								const current: AccessChoice =
+									permissions.canvases[canvas.id] ?? "inherit";
+								return (
+									<Field key={canvas.id}>
+										<FieldLabel htmlFor={id}>{canvas.name}</FieldLabel>
+										<Select
+											value={current}
+											onValueChange={(value) => {
+												const next = { ...permissions.canvases };
+												if (value === "inherit") delete next[canvas.id];
+												else next[canvas.id] = value as FlowCanvasAccess;
+												update({ canvases: next });
+											}}
+										>
+											<SelectTrigger id={id} className="w-full">
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												{Object.entries(ACCESS_LABELS).map(([value, label]) => (
+													<SelectItem key={value} value={value}>
+														{label}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+									</Field>
+								);
+							})}
+						</FieldGroup>
+
+						<FieldGroup>
+							<p className="font-medium text-sm">Canales de chat</p>
+							<label
+								htmlFor={`${prefix}-all-channels`}
+								className="flex items-center gap-2 text-sm"
+							>
+								<Checkbox
+									id={`${prefix}-all-channels`}
+									checked={allChannels}
+									onCheckedChange={(checked) =>
+										update({ channels: checked === true ? null : [] })
+									}
+								/>
+								Todos los canales
+							</label>
+							{allChannels
+								? null
+								: FLOW_CHANNEL_KEYS.map((key) => (
+										<label
+											key={key}
+											htmlFor={`${prefix}-channel-${key}`}
+											className="flex items-center gap-2 text-sm"
+										>
+											<Checkbox
+												id={`${prefix}-channel-${key}`}
+												checked={permissions.channels?.includes(key) ?? false}
+												onCheckedChange={(checked) => {
+													const set = new Set<FlowChannelKey>(
+														permissions.channels ?? [],
+													);
+													if (checked === true) set.add(key);
+													else set.delete(key);
+													update({ channels: [...set] });
+												}}
+											/>
+											{FLOW_CHANNEL_LABELS[key]}
+										</label>
+									))}
+						</FieldGroup>
+
+						<FieldGroup>
+							<Field>
+								<FieldLabel htmlFor={`${prefix}-upload`}>
+									Subir archivos a la AdLibrary
+								</FieldLabel>
+								<Select
+									value={toTristate(permissions.canUpload)}
+									onValueChange={(value) =>
+										update({ canUpload: fromTristate(value as Tristate) })
+									}
+								>
+									<SelectTrigger id={`${prefix}-upload`} className="w-full">
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										{Object.entries(TRISTATE).map(([value, label]) => (
+											<SelectItem key={value} value={value}>
+												{label}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</Field>
+							<Field>
+								<FieldLabel htmlFor={`${prefix}-export`}>
+									Exportar PDF
+								</FieldLabel>
+								<Select
+									value={toTristate(permissions.canExport)}
+									onValueChange={(value) =>
+										update({ canExport: fromTristate(value as Tristate) })
+									}
+								>
+									<SelectTrigger id={`${prefix}-export`} className="w-full">
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										{Object.entries(TRISTATE).map(([value, label]) => (
+											<SelectItem key={value} value={value}>
+												{label}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</Field>
+						</FieldGroup>
+					</div>
+				) : null}
+
+				<SheetFooter>
+					<Button
+						disabled={!member || !draft || save.isPending}
+						onClick={() => {
+							if (!member || !draft) return;
+							save.mutate({
+								projectId: project.id,
+								userId: member.userId,
+								role: member.role,
+								permissions: draft,
+							});
+						}}
+					>
+						Guardar permisos
+					</Button>
+				</SheetFooter>
+			</SheetContent>
+		</Sheet>
+	);
+}
+
 export function FlowProjectPeople({ project }: { project: FlowProject }) {
 	const trpc = useTRPC();
 	const cache = useCrmCache();
 	const { data: users = [] } = useQuery(trpc.users.list.queryOptions());
 	const [userId, setUserId] = useState("");
 	const [role, setRole] = useState<FlowRole>("EDITOR");
+	const [editing, setEditing] = useState<FlowMember | null>(null);
 
 	const setMember = useMutation(
 		trpc.flow.setMember.mutationOptions({
@@ -128,6 +375,16 @@ export function FlowProjectPeople({ project }: { project: FlowProject }) {
 										})
 									}
 								/>
+								{member.role !== "ADMIN" ? (
+									<Button
+										variant="ghost"
+										size="icon"
+										aria-label={`Permisos de ${member.name}`}
+										onClick={() => setEditing(member)}
+									>
+										<Icon icon={Settings} />
+									</Button>
+								) : null}
 								<Button
 									variant="ghost"
 									size="icon"
@@ -175,6 +432,14 @@ export function FlowProjectPeople({ project }: { project: FlowProject }) {
 					</Button>
 				</form>
 			) : null}
+
+			{isAdmin ? (
+				<MemberPermissionsSheet
+					project={project}
+					member={editing}
+					onClose={() => setEditing(null)}
+				/>
+			) : null}
 		</section>
 	);
 }
@@ -183,6 +448,8 @@ export function FlowGuestLink({ project }: { project: FlowProject }) {
 	const trpc = useTRPC();
 	const cache = useCrmCache();
 	const [link, setLink] = useState<string | null>(null);
+	const commentId = useId();
+	const [canComment, setCanComment] = useState(project.guestLink.canComment);
 
 	const create = useMutation(
 		trpc.flow.createGuestLink.mutationOptions({
@@ -207,11 +474,22 @@ export function FlowGuestLink({ project }: { project: FlowProject }) {
 
 	return (
 		<>
+			<label
+				htmlFor={commentId}
+				className="flex items-center gap-2 text-muted-foreground text-xs"
+			>
+				<Checkbox
+					id={commentId}
+					checked={canComment}
+					onCheckedChange={(checked) => setCanComment(checked === true)}
+				/>
+				El cliente puede comentar
+			</label>
 			<Button
 				variant="outline"
 				size="sm"
 				disabled={create.isPending}
-				onClick={() => create.mutate({ projectId: project.id })}
+				onClick={() => create.mutate({ projectId: project.id, canComment })}
 			>
 				<Icon icon={Share} data-icon="inline-start" />
 				{project.guestLink.active

@@ -24,7 +24,7 @@ import { dashboardSummaryInput, dashboardSummaryOutput } from "../dashboard/dash
 import { dealListInput, dealListOutput, dealIdInput, dealDetailOutput, dealCreateInput, dealCreateOutput, dealUpdateArgs, dealMutateOutput, setStageInput, dealSetStageOutput, dealContactsInput, dealContactOptionsOutput, dealAttachContactInput, dealContactLinkOutput, dealDetachContactInput, dealContactRoleInput, dealContactRoleOutput, dealBulkOwnerInput, dealBulkResultOutput, dealBulkStageInput, dealBulkInput } from "../deals/deals.contracts";
 import { enrichmentQueueInput } from "@crm/validation/enrichment-queue";
 import { fieldListInput, fieldListOutput, fieldByKeyInput, serializedFieldOutput, fieldEntityInput, fieldFiltersOutput, fieldIdInput, fieldCoverageOutput, fieldCreateInput, fieldUpdateArgs, fieldReorderInput, fieldReorderOutput, fieldDeleteOutput, fieldBackfillOutput } from "../fields/fields.contracts";
-import { flowProjectListOutput, flowIdInput, flowProjectOutput, flowProjectCreateInput, flowProjectUpdateInput, flowDeleteOutput, flowMemberSetInput, flowMemberRemoveInput, flowCanvasCreateInput, flowCanvasSummaryOutput, flowCanvasOutput, flowCanvasSaveInput, flowCanvasSaveOutput, flowCanvasThumbnailInput, flowCanvasUpdateInput, flowProjectIdInput, flowGuestLinkOutput, flowGuestTokenInput, flowGuestViewOutput, flowAssetCreateInput, flowAssetOutput, flowAssetUpdateInput, flowChecklistCreateInput, flowChecklistOutput, flowChecklistItemCreateInput, flowChecklistItemUpdateInput } from "../flow/flow.contracts";
+import { flowProjectListOutput, flowIdInput, flowProjectOutput, flowProjectCreateInput, flowProjectUpdateInput, flowDeleteOutput, flowMemberSetInput, flowMemberRemoveInput, flowCanvasCreateInput, flowCanvasSummaryOutput, flowCanvasOutput, flowCanvasSaveInput, flowCanvasSaveOutput, flowCanvasThumbnailInput, flowCanvasUpdateInput, flowGuestLinkCreateInput, flowGuestLinkOutput, flowProjectIdInput, flowGuestTokenInput, flowGuestViewOutput, flowGuestCommentInput, flowGuestCommentOutput, flowChatChannelListOutput, flowChatMessagesInput, flowChatMessageListOutput, flowChatSendInput, flowChatMessageOutput, flowAssetCreateInput, flowAssetOutput, flowAssetUpdateInput, flowChecklistCreateInput, flowChecklistOutput, flowChecklistsReorderInput, flowChecklistItemCreateInput, flowChecklistReorderInput, flowChecklistItemUpdateInput } from "../flow/flow.contracts";
 import { googleConnectionStatusOutput, setAutoCreateInput, suppressDomainInput, suppressDomainOutput, threadInput, emailThreadOutput, calendarEventInput, calendarEventOutput } from "../google/google.contracts";
 import { purgeSyncedDataOutput, revokeAccessOutput, microsoftConnectionStatusOutput, setOutlookAutoCreateInput } from "../microsoft/microsoft.contracts";
 import { savedViewListInput, savedViewListOutput, savedViewCreateInput, savedViewOutput, savedViewUpdateArgs, savedViewIdInput, savedViewDeleteOutput } from "../saved-views/saved-views.contracts";
@@ -533,13 +533,13 @@ const appRouter = t.router({
     listProjects: publicProcedure
       .output(flowProjectListOutput)
       .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    seedDemo: publicProcedure
+      .output(flowProjectListOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     getProject: publicProcedure
       .input(flowIdInput)
       .output(flowProjectOutput)
       .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
-    seedDemo: publicProcedure
-      .output(flowProjectListOutput)
-      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     createProject: publicProcedure
       .input(flowProjectCreateInput)
       .output(flowProjectOutput)
@@ -585,7 +585,7 @@ const appRouter = t.router({
       .output(flowDeleteOutput)
       .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     createGuestLink: publicProcedure
-      .input(flowProjectIdInput)
+      .input(flowGuestLinkCreateInput)
       .output(flowGuestLinkOutput)
       .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     revokeGuestLink: publicProcedure
@@ -596,6 +596,26 @@ const appRouter = t.router({
       .input(flowGuestTokenInput)
       .output(flowGuestViewOutput)
       .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    guestComment: publicProcedure
+      .input(flowGuestCommentInput)
+      .output(flowGuestCommentOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    removeGuestComment: publicProcedure
+      .input(flowIdInput)
+      .output(flowDeleteOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    chatChannels: publicProcedure
+      .input(flowProjectIdInput)
+      .output(flowChatChannelListOutput)
+      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    chatMessages: publicProcedure
+      .input(flowChatMessagesInput)
+      .output(flowChatMessageListOutput)
+      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    chatSend: publicProcedure
+      .input(flowChatSendInput)
+      .output(flowChatMessageOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     createAsset: publicProcedure
       .input(flowAssetCreateInput)
       .output(flowAssetOutput)
@@ -616,8 +636,16 @@ const appRouter = t.router({
       .input(flowIdInput)
       .output(flowDeleteOutput)
       .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    reorderChecklists: publicProcedure
+      .input(flowChecklistsReorderInput)
+      .output(flowDeleteOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     addChecklistItem: publicProcedure
       .input(flowChecklistItemCreateInput)
+      .output(flowChecklistOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    reorderChecklistItems: publicProcedure
+      .input(flowChecklistReorderInput)
       .output(flowChecklistOutput)
       .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     updateChecklistItem: publicProcedure

@@ -132,6 +132,8 @@ export function useCrmCache(): CrmCache {
 					trpc.flow.listProjects.queryKey(),
 					trpc.flow.getProject.pathKey(),
 					trpc.flow.getCanvas.pathKey(),
+					trpc.flow.chatChannels.pathKey(),
+					trpc.flow.chatMessages.pathKey(),
 				],
 				[],
 				options,

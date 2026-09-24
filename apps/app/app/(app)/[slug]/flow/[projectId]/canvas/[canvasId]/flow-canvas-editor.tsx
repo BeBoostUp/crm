@@ -65,6 +65,7 @@ function Editor({ canvas }: { canvas: RouterOutputs["flow"]["getCanvas"] }) {
 	const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const [document, setDocument] = useState<FlowCanvasDocument>(canvas.document);
 	const [mode, setMode] = useState<Mode>(canvas.canEdit ? "edit" : "present");
+	const [cinematic, setCinematic] = useState(false);
 	const [printInternal, setPrintInternal] = useState(false);
 	const [printImage, setPrintImage] = useState<string | null>(null);
 	const [status, setStatus] = useState<Status>("saved");
@@ -158,13 +159,34 @@ function Editor({ canvas }: { canvas: RouterOutputs["flow"]["getCanvas"] }) {
 							</TabsList>
 						</Tabs>
 					) : null}
-					<Button variant="outline" size="sm" onClick={() => void print(false)}>
-						<Icon icon={Printer} data-icon="inline-start" />
-						PDF cliente
-					</Button>
-					<Button variant="outline" size="sm" onClick={() => void print(true)}>
-						PDF interno
-					</Button>
+					{mode === "present" ? (
+						<Button
+							variant={cinematic ? "default" : "outline"}
+							size="sm"
+							onClick={() => setCinematic((value) => !value)}
+						>
+							Modo cine
+						</Button>
+					) : null}
+					{canvas.canExport ? (
+						<>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => void print(false)}
+							>
+								<Icon icon={Printer} data-icon="inline-start" />
+								PDF cliente
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => void print(true)}
+							>
+								PDF interno
+							</Button>
+						</>
+					) : null}
 				</div>
 			</div>
 
@@ -176,6 +198,7 @@ function Editor({ canvas }: { canvas: RouterOutputs["flow"]["getCanvas"] }) {
 					type={canvas.type}
 					canEdit={canvas.canEdit}
 					presentation={mode === "present"}
+					cinematic={cinematic}
 					onDocumentChange={onDocumentChange}
 				/>
 			</div>

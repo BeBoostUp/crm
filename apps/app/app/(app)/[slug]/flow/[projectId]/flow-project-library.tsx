@@ -14,6 +14,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@crm/ui/components/select";
+import { SortableItem, SortableList } from "@crm/ui/components/sortable-list";
 import { Spinner } from "@crm/ui/components/spinner";
 import { useMutation } from "@tanstack/react-query";
 import { useId, useState } from "react";
@@ -101,6 +102,7 @@ function FlowAssets({ project }: { project: FlowProject }) {
 	const [file, setFile] = useState<File | null>(null);
 	const [uploading, setUploading] = useState(false);
 	const canEdit = project.role !== "VIEWER";
+	const canUpload = project.me.canUpload;
 
 	const create = useMutation(
 		trpc.flow.createAsset.mutationOptions({
@@ -252,21 +254,23 @@ function FlowAssets({ project }: { project: FlowProject }) {
 						aria-label="Enlace"
 						className="sm:col-span-2"
 					/>
-					<div className="sm:col-span-2">
-						<label
-							htmlFor={fileId}
-							className="block text-muted-foreground text-xs"
-						>
-							Archivo (imagen hasta 5 MB, PDF hasta 10 MB, video hasta 30 MB;
-							las imágenes se comprimen solas)
-						</label>
-						<Input
-							id={fileId}
-							type="file"
-							accept={FLOW_UPLOAD.accept}
-							onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-						/>
-					</div>
+					{canUpload ? (
+						<div className="sm:col-span-2">
+							<label
+								htmlFor={fileId}
+								className="block text-muted-foreground text-xs"
+							>
+								Archivo (imagen hasta 5 MB, PDF hasta 10 MB, video hasta 30 MB;
+								las imágenes se comprimen solas)
+							</label>
+							<Input
+								id={fileId}
+								type="file"
+								accept={FLOW_UPLOAD.accept}
+								onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+							/>
+						</div>
+					) : null}
 					<Input
 						value={notes}
 						onChange={(event) => setNotes(event.target.value)}
@@ -360,12 +364,14 @@ function FlowChecklist({
 	const trpc = useTRPC();
 	const cache = useCrmCache();
 	const [text, setText] = useState("");
+	const [parentId, setParentId] = useState<string | null>(null);
 
 	const addItem = useMutation(
 		trpc.flow.addChecklistItem.mutationOptions({
 			onSuccess: async () => {
 				await cache.flow();
 				setText("");
+				setParentId(null);
 			},
 			onError: (error) => toast.error(error.message),
 		}),
@@ -388,8 +394,58 @@ function FlowChecklist({
 			onError: (error) => toast.error(error.message),
 		}),
 	);
+	const reorder = useMutation(
+		trpc.flow.reorderChecklistItems.mutationOptions({
+			onSuccess: () => cache.flow(),
+			onError: (error) => toast.error(error.message),
+		}),
+	);
 
+	const parents = checklist.items.filter((item) => item.parentId === null);
+	const childrenOf = (id: string) =>
+		checklist.items.filter((item) => item.parentId === id);
 	const done = checklist.items.filter((item) => item.done).length;
+
+	const row = (item: FlowProject["checklists"][number]["items"][number]) => (
+		<div className="flex items-center gap-2">
+			<Checkbox
+				checked={item.done}
+				disabled={!canEdit}
+				aria-label={item.text}
+				onCheckedChange={(checked) =>
+					updateItem.mutate({ id: item.id, done: checked === true })
+				}
+			/>
+			<span
+				className={
+					item.done
+						? "flex-1 text-muted-foreground text-sm line-through"
+						: "flex-1 text-sm"
+				}
+			>
+				{item.text}
+			</span>
+			{canEdit && item.parentId === null ? (
+				<Button
+					variant="ghost"
+					size="sm"
+					onClick={() => setParentId(parentId === item.id ? null : item.id)}
+				>
+					Subtarea
+				</Button>
+			) : null}
+			{canEdit ? (
+				<Button
+					variant="ghost"
+					size="icon"
+					aria-label={`Quitar ${item.text}`}
+					onClick={() => removeItem.mutate({ id: item.id })}
+				>
+					<Icon icon={Close} />
+				</Button>
+			) : null}
+		</div>
+	);
 
 	return (
 		<div className="space-y-2 rounded-md border bg-card p-3">
@@ -406,51 +462,64 @@ function FlowChecklist({
 					/>
 				) : null}
 			</div>
-			<ul className="space-y-1">
-				{checklist.items.map((item) => (
-					<li key={item.id} className="flex items-center gap-2">
-						<Checkbox
-							checked={item.done}
-							disabled={!canEdit}
-							aria-label={item.text}
-							onCheckedChange={(checked) =>
-								updateItem.mutate({ id: item.id, done: checked === true })
-							}
-						/>
-						<span
-							className={
-								item.done
-									? "flex-1 text-muted-foreground text-sm line-through"
-									: "flex-1 text-sm"
-							}
-						>
-							{item.text}
-						</span>
-						{canEdit ? (
-							<Button
-								variant="ghost"
-								size="icon"
-								aria-label={`Quitar ${item.text}`}
-								onClick={() => removeItem.mutate({ id: item.id })}
-							>
-								<Icon icon={Close} />
-							</Button>
-						) : null}
-					</li>
-				))}
-			</ul>
+			{canEdit ? (
+				<SortableList
+					ids={parents.map((item) => item.id)}
+					onReorder={(ids) =>
+						reorder.mutate({ checklistId: checklist.id, ids })
+					}
+				>
+					{parents.map((item) => (
+						<SortableItem key={item.id} id={item.id} label={item.text}>
+							<div className="flex-1">
+								{row(item)}
+								{childrenOf(item.id).length > 0 ? (
+									<ul className="ml-6 space-y-1">
+										{childrenOf(item.id).map((child) => (
+											<li key={child.id}>{row(child)}</li>
+										))}
+									</ul>
+								) : null}
+							</div>
+						</SortableItem>
+					))}
+				</SortableList>
+			) : (
+				<ul className="space-y-1">
+					{parents.map((item) => (
+						<li key={item.id}>
+							{row(item)}
+							{childrenOf(item.id).length > 0 ? (
+								<ul className="ml-6 space-y-1">
+									{childrenOf(item.id).map((child) => (
+										<li key={child.id}>{row(child)}</li>
+									))}
+								</ul>
+							) : null}
+						</li>
+					))}
+				</ul>
+			)}
 			{canEdit ? (
 				<form
 					className="flex gap-2"
 					onSubmit={(event) => {
 						event.preventDefault();
-						addItem.mutate({ checklistId: checklist.id, text: text.trim() });
+						addItem.mutate({
+							checklistId: checklist.id,
+							text: text.trim(),
+							parentId,
+						});
 					}}
 				>
 					<Input
 						value={text}
 						onChange={(event) => setText(event.target.value)}
-						placeholder="Agregar una tarea"
+						placeholder={
+							parentId
+								? `Subtarea de «${checklist.items.find((item) => item.id === parentId)?.text ?? ""}»`
+								: "Agregar una tarea"
+						}
 						aria-label="Agregar una tarea"
 						maxLength={500}
 						required

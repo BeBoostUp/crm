@@ -29,6 +29,8 @@ import {
 	primaryWorkspaceDomain,
 } from "./workspace";
 
+const MAILBOX_SCOPES = false;
+
 const socialProviders: NonNullable<BetterAuthOptions["socialProviders"]> = {};
 const slackOAuth = env.slack;
 const slackRedirectUri = new URL(
@@ -40,7 +42,7 @@ if (env.google) {
 	const google: NonNullable<typeof socialProviders.google> = {
 		...env.google,
 
-		scope: [...SYNC_SCOPES],
+		scope: MAILBOX_SCOPES ? [...SYNC_SCOPES] : [],
 
 		accessType: "offline",
 	};
