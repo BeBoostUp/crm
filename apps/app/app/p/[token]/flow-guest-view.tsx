@@ -25,6 +25,7 @@ import {
 	FlowCanvasBoard,
 } from "@/components/flow/flow-canvas-board";
 import { FlowPrint } from "@/components/flow/flow-print";
+import { FlowPortal } from "@/components/flow/portal/flow-portal";
 import { useTRPC } from "@/lib/trpc/client";
 import type { RouterOutputs } from "@/lib/trpc/types";
 
@@ -52,6 +53,7 @@ export function FlowGuestView({
 	const [body, setBody] = useState("");
 	const [comments, setComments] = useState<GuestComment[]>(data.comments);
 	const [cinematic, setCinematic] = useState(false);
+	const [view, setView] = useState<"plan" | "portal">("plan");
 	const canvas = data.canvases.find((item) => item.id === canvasId) ?? null;
 
 	const send = useMutation(
@@ -93,7 +95,18 @@ export function FlowGuestView({
 							.join(" · ") || "Plan de campaña"}
 					</p>
 				</div>
-				{data.canvases.length > 1 ? (
+				<Tabs
+					value={view}
+					onValueChange={(value) =>
+						setView(value === "portal" ? "portal" : "plan")
+					}
+				>
+					<TabsList>
+						<TabsTrigger value="plan">Plan</TabsTrigger>
+						<TabsTrigger value="portal">Portal · vista previa</TabsTrigger>
+					</TabsList>
+				</Tabs>
+				{view === "plan" && data.canvases.length > 1 ? (
 					<Tabs value={canvasId} onValueChange={setCanvasId}>
 						<TabsList>
 							{data.canvases.map((item) => (
@@ -133,7 +146,11 @@ export function FlowGuestView({
 				) : null}
 			</div>
 
-			{canvas ? (
+			{view === "portal" ? (
+				<div className="min-h-0 flex-1 overflow-y-auto p-4">
+					<FlowPortal mode="client" />
+				</div>
+			) : canvas ? (
 				<>
 					<div className="min-h-0 flex-1 print:hidden">
 						<FlowCanvasBoard

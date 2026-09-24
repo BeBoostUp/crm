@@ -151,6 +151,11 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 							Todos los proyectos
 						</Link>
 					</Button>
+					<Button asChild variant="outline" size="sm">
+						<Link href={url(`/flow/${project.id}/portal`)}>
+							Portal · vista previa
+						</Link>
+					</Button>
 					<FlowGuestLink project={project} />
 					{project.role === "ADMIN" ? (
 						<>
