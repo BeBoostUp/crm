@@ -15,6 +15,7 @@ import { HydrateClient } from "@/lib/trpc/hydrate";
 import { getServerQueryClient, getServerTrpc } from "@/lib/trpc/server";
 import { CreateFlowProjectSheet } from "./create-flow-project-sheet";
 import { FlowProjects } from "./flow-projects";
+import { SampleDataButton } from "./sample-data-button";
 
 export const metadata: Metadata = {
 	title: "Flow",
@@ -33,6 +34,7 @@ export default function FlowPage() {
 				</PageShellHeading>
 
 				<PageShellActions>
+					<SampleDataButton />
 					<CreateFlowProjectSheet />
 				</PageShellActions>
 			</PageShellHeader>

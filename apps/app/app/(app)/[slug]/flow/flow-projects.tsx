@@ -2,35 +2,24 @@
 
 import FlowConnection from "@carbon/icons-react/es/FlowConnection";
 import { Badge } from "@crm/ui/components/badge";
-import { Button } from "@crm/ui/components/button";
 import {
 	Empty,
-	EmptyContent,
 	EmptyDescription,
 	EmptyHeader,
 	EmptyMedia,
 	EmptyTitle,
 } from "@crm/ui/components/empty";
 import { Icon } from "@crm/ui/components/icon";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { toast } from "sonner";
-import { useCrmCache } from "@/lib/trpc/cache";
 import { useTRPC } from "@/lib/trpc/client";
 import { useWorkspaceUrl } from "@/lib/use-workspace-url";
 
 export function FlowProjects() {
 	const trpc = useTRPC();
 	const url = useWorkspaceUrl();
-	const cache = useCrmCache();
 	const { data: projects = [] } = useQuery(
 		trpc.flow.listProjects.queryOptions(),
-	);
-	const seed = useMutation(
-		trpc.flow.seedDemo.mutationOptions({
-			onSuccess: () => cache.flow(),
-			onError: (error) => toast.error(error.message),
-		}),
 	);
 
 	if (projects.length === 0) {
@@ -46,15 +35,6 @@ export function FlowProjects() {
 						ads and landing pages, all in one canvas.
 					</EmptyDescription>
 				</EmptyHeader>
-				<EmptyContent>
-					<Button
-						variant="outline"
-						disabled={seed.isPending}
-						onClick={() => seed.mutate()}
-					>
-						Load sample data
-					</Button>
-				</EmptyContent>
 			</Empty>
 		);
 	}

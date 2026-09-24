@@ -21,6 +21,7 @@ import {
 } from "@crm/validation/flow-canvas";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDelete } from "@/components/flow/confirm-delete";
@@ -43,6 +44,7 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 	const trpc = useTRPC();
 	const cache = useCrmCache();
 	const url = useWorkspaceUrl();
+	const router = useRouter();
 	const nameId = useId();
 	const typeId = useId();
 	const channelId = useId();
@@ -72,6 +74,16 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 		}),
 	);
 
+	const removeProject = useMutation(
+		trpc.flow.removeProject.mutationOptions({
+			onSuccess: async () => {
+				await cache.flow();
+				router.push(url("/flow"));
+			},
+			onError: (error) => toast.error(error.message),
+		}),
+	);
+
 	if (!project) return null;
 	const canEdit = project.role !== "VIEWER";
 
@@ -95,6 +107,13 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 						</Link>
 					</Button>
 					<FlowGuestLink project={project} />
+					{project.role === "ADMIN" ? (
+						<ConfirmDelete
+							label="Delete project"
+							description={`"${project.name}" with all its canvases, references and checklists will be gone.`}
+							onConfirm={() => removeProject.mutate({ id: project.id })}
+						/>
+					) : null}
 				</PageShellActions>
 			</PageShellHeader>
 
