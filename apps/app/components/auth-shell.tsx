@@ -62,7 +62,7 @@ export function AuthHeading({
 	return (
 		<div className="flex flex-col gap-3 text-left">
 			<Link href="/" aria-label="Homepage" className="flex">
-				<Logo className="size-6 shrink-0" />
+				<BrandLogo className="size-6 shrink-0" />
 			</Link>
 			<div className="flex flex-col gap-1">
 				<h2 className="text-2xl/8 font-semibold tracking-tight text-balance">
