@@ -230,3 +230,138 @@ export const PORTAL_MOCK = {
 		{ name: "WordPress (landing)", user: "editor", updated: "02 oct" },
 	],
 } as const;
+
+export const PORTAL_MOCK_2 = {
+	onboarding: {
+		progress: 62,
+		questions: [
+			{
+				q: "¿Cuál es el objetivo principal de la campaña?",
+				a: "Citas de valoración para implantes",
+				done: true,
+			},
+			{
+				q: "¿Ticket medio y margen por tratamiento?",
+				a: "2.400 € · 55 %",
+				done: true,
+			},
+			{ q: "¿Zona de captación?", a: "Valencia y 25 km", done: true },
+			{ q: "Casos de éxito y testimonios disponibles", a: "", done: false },
+		],
+		assets: [
+			{ name: "Meta Business Manager (acceso socio)", status: "recibido" },
+			{ name: "Pixel / Dataset de Meta", status: "recibido" },
+			{ name: "Google Ads (acceso administrador)", status: "pendiente" },
+			{ name: "GA4 y dominio de la landing", status: "pendiente" },
+			{ name: "Acceso al CRM de la clínica", status: "recibido" },
+		],
+		welcome:
+			"Hola Laura, bienvenida a FlowAds. Desde este portal vas a ver tu plan, entregar los accesos que te pedimos y seguir cada hito. Primer paso: completar 4 preguntas (5 min).",
+		sops: [
+			"SOP · Publicar una campaña en Meta",
+			"SOP · Revisar CAPI cada lunes",
+			"SOP · Reporte semanal al cliente",
+		],
+	},
+	tiers: [
+		{
+			name: "Self-service",
+			price: "149 € / mes",
+			for: "El cliente opera con plantillas, checklist y soporte IA; clase semanal grupal.",
+			features: [
+				"Plantillas de embudo",
+				"AdLibrary y checklists",
+				"Soporte IA con contexto",
+				"Sin gestión 1:1",
+			],
+		},
+		{
+			name: "Full-service",
+			price: "desde 3.000 € / mes",
+			for: "La agencia opera; el cliente ve el portal, aprueba hitos y recibe el resumen ejecutivo.",
+			features: [
+				"Todo lo anterior",
+				"Equipo asignado",
+				"Atribución server-side",
+				"Contenido derivado de reuniones",
+			],
+		},
+	],
+	support: {
+		thread: [
+			{
+				who: "Laura (cliente)",
+				text: "¿En qué fase estamos y qué falta de mi parte?",
+			},
+			{
+				who: "Asistente FlowAds",
+				text: "Estamos en «Lanzamiento» (hito 3 de 4). De tu parte faltan 2 accesos: Google Ads y GA4. El resto está recibido. ¿Te mando el paso a paso?",
+			},
+			{
+				who: "Laura (cliente)",
+				text: "Sí, y quiero cambiar el horario de atención del formulario.",
+			},
+			{
+				who: "Asistente FlowAds",
+				text: "Abrí el ticket #14 «Horario del formulario» para el equipo. Si me das el acceso al CRM lo cambio yo ahora.",
+			},
+		],
+		tickets: [
+			{
+				id: "#14",
+				title: "Horario del formulario",
+				status: "abierto",
+				owner: "Miguel",
+			},
+			{
+				id: "#12",
+				title: "Logo en la landing pixelado",
+				status: "resuelto",
+				owner: "Diseño",
+			},
+		],
+	},
+	eventMap: [
+		{
+			node: "Landing valoración",
+			event: "Scroll 50 % · Vídeo 25 %",
+			received: "1.204 / 1.204",
+		},
+		{ node: "Formulario", event: "Lead", received: "186 / 186" },
+		{
+			node: "CRM · agenda",
+			event: "Cita reservada · Cualificado",
+			received: "71 / 73",
+		},
+		{ node: "Clínica", event: "Cita asistida", received: "44 / 44" },
+		{ node: "Cobro", event: "Venta · Cobro", received: "12 / 12" },
+	],
+	templates: [
+		{
+			name: "Captación de leads · Meta",
+			version: "v3",
+			instances: 14,
+			pending: 5,
+		},
+		{ name: "E-commerce · catálogo", version: "v2", instances: 6, pending: 0 },
+		{ name: "Webinar / lanzamiento", version: "v4", instances: 9, pending: 9 },
+	],
+	meetings: [
+		{
+			title: "Reunión mensual · 20 sep",
+			folder: "Cliente",
+			tasks: ["Pausar carrusel antes/después", "Pedir 2 testimonios en vídeo"],
+		},
+		{
+			title: "Sync equipo · 23 sep",
+			folder: "Equipo",
+			tasks: ["Subir versión 9:16 del UGC"],
+		},
+	],
+	starterKit: [
+		{ text: "Leer el brief y la guía de marca", done: true },
+		{ text: "Revisar el mapa de eventos y el SOP de CAPI", done: true },
+		{ text: "Acceso a Business Manager y Google Ads", done: false },
+		{ text: "Primera revisión de campaña con el account", done: false },
+	],
+} as const;

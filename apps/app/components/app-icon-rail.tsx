@@ -1,11 +1,19 @@
 "use client";
 
 import Building from "@carbon/icons-react/es/Building";
+import Bullhorn from "@carbon/icons-react/es/Bullhorn";
+import ChartLine from "@carbon/icons-react/es/ChartLine";
 import Close from "@carbon/icons-react/es/Close";
 import Dashboard from "@carbon/icons-react/es/Dashboard";
+import Document from "@carbon/icons-react/es/Document";
 import FlowConnection from "@carbon/icons-react/es/FlowConnection";
+import Headset from "@carbon/icons-react/es/Headset";
+import Login from "@carbon/icons-react/es/Login";
 import Partnership from "@carbon/icons-react/es/Partnership";
+import Receipt from "@carbon/icons-react/es/Receipt";
+import Roadmap from "@carbon/icons-react/es/Roadmap";
 import Settings from "@carbon/icons-react/es/Settings";
+import Template from "@carbon/icons-react/es/Template";
 import UserMultiple from "@carbon/icons-react/es/UserMultiple";
 import { Button } from "@crm/ui/components/button";
 import type { CarbonIcon } from "@crm/ui/components/icon";
@@ -28,6 +36,10 @@ import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 import { AgentBuilderSidebar } from "@/components/agent-builder/agent-builder-sidebar";
 import { usePrefetchSection } from "@/components/crm/section-prefetch";
+import {
+	currentFlowProjectId,
+	PROJECT_PLACEHOLDER,
+} from "@/components/flow/flow-sections";
 import { useMobileNav } from "@/components/mobile-nav";
 import { SHOW_CRM } from "@/lib/show-crm";
 import { useWorkspaceUrl } from "@/lib/use-workspace-url";
@@ -69,7 +81,32 @@ const FLOW_ITEM: RailItem = {
 	match: "prefix",
 };
 
-const ITEMS: RailItem[] = SHOW_CRM ? [FLOW_ITEM, ...CRM_ITEMS] : [FLOW_ITEM];
+const section = (
+	title: string,
+	key: string,
+	icon: RailItem["icon"],
+): RailItem => ({
+	title,
+	href: `/flow/${PROJECT_PLACEHOLDER}/portal/${key}`,
+	icon,
+	match: "prefix",
+});
+
+const FLOW_SECTION_ITEMS: RailItem[] = [
+	section("Onboarding", "onboarding", Login),
+	section("Hitos", "hitos", Roadmap),
+	section("Resumen ejecutivo", "resumen", Dashboard),
+	section("Propuesta y facturación", "facturacion", Receipt),
+	section("Atribución", "atribucion", ChartLine),
+	section("Contenido", "contenido", Bullhorn),
+	section("Soporte", "soporte", Headset),
+	section("Documentación", "docs", Document),
+	section("Plantillas y equipo", "plantillas", Template),
+];
+
+const ITEMS: RailItem[] = SHOW_CRM
+	? [FLOW_ITEM, ...FLOW_SECTION_ITEMS, ...CRM_ITEMS]
+	: [FLOW_ITEM, ...FLOW_SECTION_ITEMS];
 
 function isActive(item: RailItem, pathname: string): boolean {
 	return (
@@ -224,15 +261,23 @@ export function AppIconRail() {
 	const { open, setOpen } = useMobileNav();
 	const prefetchSection = usePrefetchSection();
 
+	const projectId = currentFlowProjectId(pathname);
 	const items = useMemo(
 		() =>
-			ITEMS.map((item) => ({
+			ITEMS.filter(
+				(item) =>
+					projectId !== null || !item.href.includes(PROJECT_PLACEHOLDER),
+			).map((item) => ({
 				...item,
 				section: item.href,
-				href: workspaceUrl(item.href),
+				href: workspaceUrl(
+					projectId
+						? item.href.replace(PROJECT_PLACEHOLDER, projectId)
+						: item.href,
+				),
 				related: item.related?.map((path) => workspaceUrl(path)),
 			})),
-		[workspaceUrl],
+		[workspaceUrl, projectId],
 	);
 	const inChat = items.some(
 		(item) => item.title === "Chat" && isActive(item, pathname),

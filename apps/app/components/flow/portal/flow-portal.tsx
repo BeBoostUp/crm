@@ -13,7 +13,12 @@ import {
 } from "@crm/ui/components/tabs";
 import { useState } from "react";
 import { toast } from "sonner";
-import { type MilestoneStatus, PORTAL_MOCK } from "./portal-mock";
+import { FLOW_SECTIONS, type FlowSection } from "../flow-sections";
+import {
+	type MilestoneStatus,
+	PORTAL_MOCK,
+	PORTAL_MOCK_2,
+} from "./portal-mock";
 
 type Mode = "team" | "client";
 
@@ -383,12 +388,298 @@ function Docs({ mode }: { mode: Mode }) {
 	);
 }
 
-export function FlowPortal({ mode }: { mode: Mode }) {
+function Onboarding({ mode }: { mode: Mode }) {
+	const data = PORTAL_MOCK_2.onboarding;
+	return (
+		<div className="space-y-6">
+			<Section title={`Onboarding · ${data.progress}% completado`}>
+				<div className="h-2 w-full rounded-sm bg-muted">
+					<div
+						className="h-2 rounded-sm bg-primary"
+						style={{ width: `${data.progress}%` }}
+					/>
+				</div>
+				<div className="rounded-md border bg-card p-3 text-sm">
+					<p className="text-muted-foreground text-xs">
+						Email de bienvenida automático
+					</p>
+					<p className="mt-1">{data.welcome}</p>
+				</div>
+			</Section>
+			<div className="grid gap-6 lg:grid-cols-2">
+				<Section title="Cuestionario">
+					{data.questions.map((item) => (
+						<div key={item.q} className="rounded-md border bg-card p-3 text-sm">
+							<p className="font-medium">{item.q}</p>
+							<p
+								className={
+									item.done
+										? "text-muted-foreground text-xs"
+										: "text-warning text-xs"
+								}
+							>
+								{item.done ? item.a : "Pendiente de respuesta"}
+							</p>
+						</div>
+					))}
+				</Section>
+				<Section title="Accesos requeridos (cifrados, van al supervisor)">
+					{data.assets.map((asset) => (
+						<div
+							key={asset.name}
+							className="flex items-center gap-2 rounded-md border bg-card p-3 text-sm"
+						>
+							<Icon icon={Locked} />
+							<p className="flex-1">{asset.name}</p>
+							<Badge
+								variant={asset.status === "recibido" ? "default" : "outline"}
+							>
+								{asset.status}
+							</Badge>
+							{mode === "client" && asset.status === "pendiente" ? (
+								<Button
+									size="sm"
+									variant="outline"
+									onClick={() => toast.success("Acceso enviado (ejemplo).")}
+								>
+									Entregar
+								</Button>
+							) : null}
+						</div>
+					))}
+				</Section>
+			</div>
+			<Section title="SOPs entregados al cierre del proyecto">
+				<div className="flex flex-wrap gap-2">
+					{data.sops.map((sop) => (
+						<Badge key={sop} variant="outline">
+							{sop}
+						</Badge>
+					))}
+				</div>
+			</Section>
+		</div>
+	);
+}
+
+function Support({ mode }: { mode: Mode }) {
+	const data = PORTAL_MOCK_2.support;
+	return (
+		<div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
+			<Section title="Soporte con IA · sabe todo del proyecto">
+				<div className="space-y-2 rounded-md border bg-card p-3">
+					{data.thread.map((entry) => (
+						<div key={entry.text} className="text-sm">
+							<p className="text-muted-foreground text-xs">{entry.who}</p>
+							<p>{entry.text}</p>
+						</div>
+					))}
+				</div>
+				<p className="text-muted-foreground text-xs">
+					Responde con la ficha del cliente, las fases y la checklist; con
+					permiso, ejecuta cambios.
+					{mode === "team" ? " El cliente puede usar su propia API key." : ""}
+				</p>
+			</Section>
+			<Section title="Incidencias">
+				{data.tickets.map((ticket) => (
+					<div
+						key={ticket.id}
+						className="flex items-center gap-2 rounded-md border bg-card p-3 text-sm"
+					>
+						<span className="font-mono text-xs">{ticket.id}</span>
+						<p className="flex-1">{ticket.title}</p>
+						<Badge
+							variant={ticket.status === "resuelto" ? "default" : "secondary"}
+						>
+							{ticket.status}
+						</Badge>
+						{mode === "team" ? (
+							<span className="text-muted-foreground text-xs">
+								{ticket.owner}
+							</span>
+						) : null}
+					</div>
+				))}
+			</Section>
+		</div>
+	);
+}
+
+function EventMap() {
+	return (
+		<Section title="Plan de medición · evento por nodo del lienzo">
+			<table className="w-full text-sm">
+				<thead className="text-muted-foreground text-xs">
+					<tr>
+						<th className="py-1 text-left font-normal">Nodo</th>
+						<th className="py-1 text-left font-normal">Evento</th>
+						<th className="py-1 text-right font-normal">
+							Recibidos / esperados
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					{PORTAL_MOCK_2.eventMap.map((row) => (
+						<tr key={row.node} className="border-t">
+							<td className="py-2">{row.node}</td>
+							<td className="py-2 text-xs">{row.event}</td>
+							<td className="py-2 text-right font-mono text-xs">
+								{row.received}
+							</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</Section>
+	);
+}
+
+function Templates() {
+	return (
+		<Section title="Plantillas versionadas">
+			{PORTAL_MOCK_2.templates.map((template) => (
+				<div
+					key={template.name}
+					className="flex flex-wrap items-center gap-2 rounded-md border bg-card p-3 text-sm"
+				>
+					<p className="flex-1 font-medium">{template.name}</p>
+					<Badge variant="mono">{template.version}</Badge>
+					<span className="text-muted-foreground text-xs">
+						{template.instances} proyectos
+					</span>
+					{template.pending > 0 ? (
+						<Button
+							size="sm"
+							variant="outline"
+							onClick={() => toast.success("Actualización aplicada (ejemplo).")}
+						>
+							Actualizar {template.pending} proyectos
+						</Button>
+					) : (
+						<Badge variant="default">al día</Badge>
+					)}
+				</div>
+			))}
+			<p className="text-muted-foreground text-xs">
+				Una mejora en la plantilla llega a todos los proyectos sin pisar lo
+				personalizado.
+			</p>
+		</Section>
+	);
+}
+
+function Team() {
+	return (
+		<div className="grid gap-6 lg:grid-cols-2">
+			<Section title="Reuniones → tareas">
+				{PORTAL_MOCK_2.meetings.map((meeting) => (
+					<div
+						key={meeting.title}
+						className="rounded-md border bg-card p-3 text-sm"
+					>
+						<div className="flex items-center gap-2">
+							<p className="flex-1 font-medium">{meeting.title}</p>
+							<Badge variant="outline">{meeting.folder}</Badge>
+						</div>
+						<ul className="mt-1 text-muted-foreground text-xs">
+							{meeting.tasks.map((task) => (
+								<li key={task}>· {task} → checklist</li>
+							))}
+						</ul>
+					</div>
+				))}
+			</Section>
+			<Section title="Starter kit para nuevos del equipo">
+				{PORTAL_MOCK_2.starterKit.map((item) => (
+					<div
+						key={item.text}
+						className="flex items-center gap-2 rounded-md border bg-card p-3 text-sm"
+					>
+						<span
+							className={item.done ? "text-success" : "text-muted-foreground"}
+						>
+							<Icon icon={Checkmark} />
+						</span>
+						<p className={item.done ? "line-through" : ""}>{item.text}</p>
+					</div>
+				))}
+			</Section>
+		</div>
+	);
+}
+
+function Tiers() {
+	return (
+		<Section title="Niveles de servicio">
+			<div className="grid gap-3 sm:grid-cols-2">
+				{PORTAL_MOCK_2.tiers.map((tier) => (
+					<div
+						key={tier.name}
+						className="rounded-md border bg-card p-3 text-sm"
+					>
+						<div className="flex items-center gap-2">
+							<p className="font-medium">{tier.name}</p>
+							<Badge variant="outline">{tier.price}</Badge>
+						</div>
+						<p className="mt-1 text-muted-foreground text-xs">{tier.for}</p>
+						<ul className="mt-2 text-xs">
+							{tier.features.map((feature) => (
+								<li key={feature}>· {feature}</li>
+							))}
+						</ul>
+					</div>
+				))}
+			</div>
+		</Section>
+	);
+}
+
+export function FlowPortal({
+	mode,
+	section,
+}: {
+	mode: Mode;
+	section?: FlowSection;
+}) {
+	if (section) {
+		return (
+			<div className="space-y-4">
+				<Preview />
+				<h1 className="font-semibold text-lg">{FLOW_SECTIONS[section]}</h1>
+				{section === "onboarding" ? <Onboarding mode={mode} /> : null}
+				{section === "hitos" ? <Milestones mode={mode} /> : null}
+				{section === "resumen" ? <Summary /> : null}
+				{section === "facturacion" ? (
+					<div className="space-y-6">
+						<Billing mode={mode} />
+						<Tiers />
+					</div>
+				) : null}
+				{section === "atribucion" ? (
+					<div className="space-y-6">
+						<EventMap />
+						<Attribution />
+					</div>
+				) : null}
+				{section === "contenido" ? <Content mode={mode} /> : null}
+				{section === "soporte" ? <Support mode={mode} /> : null}
+				{section === "docs" ? <Docs mode={mode} /> : null}
+				{section === "plantillas" ? (
+					<div className="space-y-6">
+						<Templates />
+						<Team />
+					</div>
+				) : null}
+			</div>
+		);
+	}
 	return (
 		<div className="space-y-4">
 			<Preview />
 			<Tabs defaultValue="hitos">
 				<TabsList className="flex-wrap">
+					<TabsTrigger value="onboarding">Onboarding</TabsTrigger>
 					<TabsTrigger value="hitos">Hitos</TabsTrigger>
 					<TabsTrigger value="resumen">Resumen ejecutivo</TabsTrigger>
 					<TabsTrigger value="facturacion">
@@ -398,25 +689,41 @@ export function FlowPortal({ mode }: { mode: Mode }) {
 					</TabsTrigger>
 					<TabsTrigger value="atribucion">Atribución</TabsTrigger>
 					<TabsTrigger value="contenido">Contenido</TabsTrigger>
+					<TabsTrigger value="soporte">Soporte</TabsTrigger>
 					<TabsTrigger value="docs">Documentación</TabsTrigger>
+					{mode === "team" ? (
+						<TabsTrigger value="plantillas">Plantillas y equipo</TabsTrigger>
+					) : null}
 				</TabsList>
+				<TabsContent value="onboarding" className="pt-4">
+					<Onboarding mode={mode} />
+				</TabsContent>
 				<TabsContent value="hitos" className="pt-4">
 					<Milestones mode={mode} />
 				</TabsContent>
 				<TabsContent value="resumen" className="pt-4">
 					<Summary />
 				</TabsContent>
-				<TabsContent value="facturacion" className="pt-4">
+				<TabsContent value="facturacion" className="space-y-6 pt-4">
 					<Billing mode={mode} />
+					<Tiers />
 				</TabsContent>
-				<TabsContent value="atribucion" className="pt-4">
+				<TabsContent value="atribucion" className="space-y-6 pt-4">
+					<EventMap />
 					<Attribution />
 				</TabsContent>
 				<TabsContent value="contenido" className="pt-4">
 					<Content mode={mode} />
 				</TabsContent>
+				<TabsContent value="soporte" className="pt-4">
+					<Support mode={mode} />
+				</TabsContent>
 				<TabsContent value="docs" className="pt-4">
 					<Docs mode={mode} />
+				</TabsContent>
+				<TabsContent value="plantillas" className="space-y-6 pt-4">
+					<Templates />
+					<Team />
 				</TabsContent>
 			</Tabs>
 		</div>

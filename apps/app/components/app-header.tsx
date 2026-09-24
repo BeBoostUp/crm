@@ -23,6 +23,7 @@ import { useTheme } from "next-themes";
 import { toast } from "sonner";
 import { BrandLogo } from "@/components/brand-logo";
 import { EnrichmentQueue } from "@/components/enrichment-queue";
+import { ProjectSwitcher } from "@/components/flow/project-switcher";
 import { useMobileNav } from "@/components/mobile-nav";
 import { SHOW_CRM } from "@/lib/show-crm";
 import { signOutAndRedirect } from "@/lib/sign-out";
@@ -59,7 +60,7 @@ export function AppHeader({ user }: { user: User }) {
 					<BrandLogo className="size-7" />
 				</Link>
 				<Separator orientation="vertical" className="mx-1 h-5 bg-transparent" />
-				<span className="min-w-0 truncate font-medium text-sm">{label}</span>
+				<ProjectSwitcher fallback={label} />
 			</div>
 
 			<div className="ml-auto flex shrink-0 items-center gap-1.5">

@@ -7,6 +7,7 @@ import { Tabs, TabsList, TabsTrigger } from "@crm/ui/components/tabs";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
+import type { FlowSection } from "@/components/flow/flow-sections";
 import { FlowPortal } from "@/components/flow/portal/flow-portal";
 import {
 	PageShell,
@@ -20,7 +21,13 @@ import {
 import { useTRPC } from "@/lib/trpc/client";
 import { useWorkspaceUrl } from "@/lib/use-workspace-url";
 
-export function FlowPortalPage({ projectId }: { projectId: string }) {
+export function FlowPortalPage({
+	projectId,
+	section,
+}: {
+	projectId: string;
+	section?: FlowSection;
+}) {
 	const trpc = useTRPC();
 	const url = useWorkspaceUrl();
 	const [mode, setMode] = useState<"team" | "client">("team");
@@ -61,7 +68,7 @@ export function FlowPortalPage({ projectId }: { projectId: string }) {
 				</PageShellActions>
 			</PageShellHeader>
 			<PageShellContent className="min-h-0 overflow-y-auto">
-				<FlowPortal mode={mode} />
+				<FlowPortal mode={mode} section={section} />
 			</PageShellContent>
 		</PageShell>
 	);
