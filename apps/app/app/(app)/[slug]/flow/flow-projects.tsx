@@ -51,10 +51,20 @@ export function FlowProjects() {
 				<li key={project.id}>
 					<Link
 						href={url(`/flow/${project.id}`)}
-						className="block rounded-md border bg-card p-4 transition-colors hover:bg-muted/50"
+						className="block rounded-md border border-l-4 bg-card p-4 transition-colors hover:bg-muted/50"
+						style={{ borderLeftColor: project.color ?? undefined }}
 					>
 						<div className="flex items-start justify-between gap-2">
-							<p className="truncate font-medium">{project.name}</p>
+							<span className="flex min-w-0 items-center gap-2">
+								{project.logoUrl ? (
+									<img
+										src={project.logoUrl}
+										alt=""
+										className="size-8 shrink-0 rounded-md object-cover"
+									/>
+								) : null}
+								<p className="truncate font-medium">{project.name}</p>
+							</span>
 							<Badge
 								variant={project.completeness === 100 ? "default" : "outline"}
 							>

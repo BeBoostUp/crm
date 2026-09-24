@@ -24,7 +24,7 @@ import { dashboardSummaryInput, dashboardSummaryOutput } from "../dashboard/dash
 import { dealListInput, dealListOutput, dealIdInput, dealDetailOutput, dealCreateInput, dealCreateOutput, dealUpdateArgs, dealMutateOutput, setStageInput, dealSetStageOutput, dealContactsInput, dealContactOptionsOutput, dealAttachContactInput, dealContactLinkOutput, dealDetachContactInput, dealContactRoleInput, dealContactRoleOutput, dealBulkOwnerInput, dealBulkResultOutput, dealBulkStageInput, dealBulkInput } from "../deals/deals.contracts";
 import { enrichmentQueueInput } from "@crm/validation/enrichment-queue";
 import { fieldListInput, fieldListOutput, fieldByKeyInput, serializedFieldOutput, fieldEntityInput, fieldFiltersOutput, fieldIdInput, fieldCoverageOutput, fieldCreateInput, fieldUpdateArgs, fieldReorderInput, fieldReorderOutput, fieldDeleteOutput, fieldBackfillOutput } from "../fields/fields.contracts";
-import { flowProjectListOutput, flowIdInput, flowProjectOutput, flowProjectCreateInput, flowProjectUpdateInput, flowDeleteOutput, flowMemberSetInput, flowMemberRemoveInput, flowCanvasCreateInput, flowCanvasSummaryOutput, flowCanvasOutput, flowCanvasSaveInput, flowCanvasSaveOutput, flowCanvasUpdateInput, flowProjectIdInput, flowGuestLinkOutput, flowGuestTokenInput, flowGuestViewOutput, flowAssetCreateInput, flowAssetOutput, flowAssetUpdateInput, flowChecklistCreateInput, flowChecklistOutput, flowChecklistItemCreateInput, flowChecklistItemUpdateInput } from "../flow/flow.contracts";
+import { flowProjectListOutput, flowIdInput, flowProjectOutput, flowProjectCreateInput, flowProjectUpdateInput, flowDeleteOutput, flowMemberSetInput, flowMemberRemoveInput, flowCanvasCreateInput, flowCanvasSummaryOutput, flowCanvasOutput, flowCanvasSaveInput, flowCanvasSaveOutput, flowCanvasThumbnailInput, flowCanvasUpdateInput, flowProjectIdInput, flowGuestLinkOutput, flowGuestTokenInput, flowGuestViewOutput, flowAssetCreateInput, flowAssetOutput, flowAssetUpdateInput, flowChecklistCreateInput, flowChecklistOutput, flowChecklistItemCreateInput, flowChecklistItemUpdateInput } from "../flow/flow.contracts";
 import { googleConnectionStatusOutput, setAutoCreateInput, suppressDomainInput, suppressDomainOutput, threadInput, emailThreadOutput, calendarEventInput, calendarEventOutput } from "../google/google.contracts";
 import { purgeSyncedDataOutput, revokeAccessOutput, microsoftConnectionStatusOutput, setOutlookAutoCreateInput } from "../microsoft/microsoft.contracts";
 import { savedViewListInput, savedViewListOutput, savedViewCreateInput, savedViewOutput, savedViewUpdateArgs, savedViewIdInput, savedViewDeleteOutput } from "../saved-views/saved-views.contracts";
@@ -571,6 +571,10 @@ const appRouter = t.router({
     saveCanvas: publicProcedure
       .input(flowCanvasSaveInput)
       .output(flowCanvasSaveOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    setCanvasThumbnail: publicProcedure
+      .input(flowCanvasThumbnailInput)
+      .output(flowDeleteOutput)
       .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     updateCanvas: publicProcedure
       .input(flowCanvasUpdateInput)

@@ -1611,6 +1611,7 @@ model FlowProject {
   name        String
   description String?
   color       String?
+  logoUrl     String?
 
   companyId String?
   company   Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
@@ -1653,6 +1654,7 @@ model FlowCanvas {
   channel      String?
   document     Json
   completeness Int            @default(0)
+  thumbnailUrl String?
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 
@@ -1679,6 +1681,9 @@ model FlowAsset {
   kind      FlowAssetKind
   title     String
   url       String?
+  fileUrl   String?
+  fileType  String?
+  fileSize  Int?
   notes     String?
   tags      String[]      @default([])
   createdAt DateTime      @default(now())

@@ -21,6 +21,7 @@ import {
 	flowCanvasSaveInput,
 	flowCanvasSaveOutput,
 	flowCanvasSummaryOutput,
+	flowCanvasThumbnailInput,
 	flowCanvasUpdateInput,
 	flowChecklistCreateInput,
 	flowChecklistItemCreateInput,
@@ -178,6 +179,23 @@ export class FlowRouter {
 		@Input() input: z.infer<typeof flowCanvasSaveInput>,
 	) {
 		return this.flow.saveCanvas(input.id, input.document, ctx.user.id);
+	}
+
+	@Mutation({
+		input: flowCanvasThumbnailInput,
+		output: flowDeleteOutput,
+		meta: restMeta("PUT", "/flow/canvases/{id}/thumbnail", TAGS),
+	})
+	@UseMiddlewares(AuthMiddleware)
+	async setCanvasThumbnail(
+		@Ctx() ctx: AuthedTrpcContext,
+		@Input() input: z.infer<typeof flowCanvasThumbnailInput>,
+	) {
+		return this.flow.setCanvasThumbnail(
+			input.id,
+			input.thumbnailUrl,
+			ctx.user.id,
+		);
 	}
 
 	@Mutation({

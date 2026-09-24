@@ -15,13 +15,24 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { FlowCanvasBoard } from "@/components/flow/flow-canvas-board";
+import {
+	type FlowBoardHandle,
+	FlowCanvasBoard,
+} from "@/components/flow/flow-canvas-board";
 import { FlowPrint } from "@/components/flow/flow-print";
+import { dataUrlToFile, uploadFlowFile } from "@/components/flow/flow-upload";
+import { useCrmCache } from "@/lib/trpc/cache";
 import { useTRPC } from "@/lib/trpc/client";
 import type { RouterOutputs } from "@/lib/trpc/types";
 import { useWorkspaceUrl } from "@/lib/use-workspace-url";
 
 const SAVE_DELAY_MS = 700;
+
+const THUMBNAIL_EVERY_MS = 20_000;
+
+const THUMBNAIL = { width: 640, height: 360 } as const;
+
+const PRINT = { width: 1600, height: 900 } as const;
 
 const STATUS_LABEL = {
 	saved: "Guardado",
@@ -47,16 +58,45 @@ export function FlowCanvasEditor({ canvasId }: { canvasId: string }) {
 
 function Editor({ canvas }: { canvas: RouterOutputs["flow"]["getCanvas"] }) {
 	const trpc = useTRPC();
+	const cache = useCrmCache();
 	const url = useWorkspaceUrl();
+	const board = useRef<FlowBoardHandle>(null);
+	const lastThumbnail = useRef(0);
+	const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const [document, setDocument] = useState<FlowCanvasDocument>(canvas.document);
 	const [mode, setMode] = useState<Mode>(canvas.canEdit ? "edit" : "present");
 	const [printInternal, setPrintInternal] = useState(false);
+	const [printImage, setPrintImage] = useState<string | null>(null);
 	const [status, setStatus] = useState<Status>("saved");
-	const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	const thumbnail = useMutation(
+		trpc.flow.setCanvasThumbnail.mutationOptions({
+			onSuccess: () => cache.flow(),
+		}),
+	);
+
+	const refreshThumbnail = async (): Promise<void> => {
+		if (Date.now() - lastThumbnail.current < THUMBNAIL_EVERY_MS) return;
+		lastThumbnail.current = Date.now();
+		const png = await board.current?.snapshot(
+			THUMBNAIL.width,
+			THUMBNAIL.height,
+		);
+		if (!png) return;
+		const uploaded = await uploadFlowFile(
+			await dataUrlToFile(png, "thumbnail.png"),
+			canvas.projectId,
+			"thumbnail",
+		);
+		thumbnail.mutate({ id: canvas.id, thumbnailUrl: uploaded.url });
+	};
 
 	const save = useMutation(
 		trpc.flow.saveCanvas.mutationOptions({
-			onSuccess: () => setStatus("saved"),
+			onSuccess: () => {
+				setStatus("saved");
+				refreshThumbnail().catch(() => undefined);
+			},
 			onError: (error) => {
 				setStatus("error");
 				toast.error(error.message);
@@ -74,9 +114,12 @@ function Editor({ canvas }: { canvas: RouterOutputs["flow"]["getCanvas"] }) {
 		}, SAVE_DELAY_MS);
 	};
 
-	const print = (internal: boolean): void => {
+	const print = async (internal: boolean): Promise<void> => {
 		setPrintInternal(internal);
-		setTimeout(() => window.print(), 50);
+		setPrintImage(
+			(await board.current?.snapshot(PRINT.width, PRINT.height)) ?? null,
+		);
+		setTimeout(() => window.print(), 100);
 	};
 
 	const completeness = flowCompleteness(document);
@@ -115,11 +158,11 @@ function Editor({ canvas }: { canvas: RouterOutputs["flow"]["getCanvas"] }) {
 							</TabsList>
 						</Tabs>
 					) : null}
-					<Button variant="outline" size="sm" onClick={() => print(false)}>
+					<Button variant="outline" size="sm" onClick={() => void print(false)}>
 						<Icon icon={Printer} data-icon="inline-start" />
 						PDF cliente
 					</Button>
-					<Button variant="outline" size="sm" onClick={() => print(true)}>
+					<Button variant="outline" size="sm" onClick={() => void print(true)}>
 						PDF interno
 					</Button>
 				</div>
@@ -128,6 +171,7 @@ function Editor({ canvas }: { canvas: RouterOutputs["flow"]["getCanvas"] }) {
 			<div className="min-h-0 flex-1 print:hidden">
 				<FlowCanvasBoard
 					key={mode}
+					ref={board}
 					document={document}
 					type={canvas.type}
 					canEdit={canvas.canEdit}
@@ -141,6 +185,7 @@ function Editor({ canvas }: { canvas: RouterOutputs["flow"]["getCanvas"] }) {
 				subtitle={`${canvas.projectName} · ${FLOW_CANVAS_LABELS[canvas.type]}`}
 				document={document}
 				internal={printInternal}
+				image={printImage}
 			/>
 		</div>
 	);

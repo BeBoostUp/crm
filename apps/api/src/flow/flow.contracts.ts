@@ -38,6 +38,7 @@ export const flowProjectUpdateInput = z.object({
 	companyId: z.string().nullable().optional(),
 	description: z.string().trim().max(2000).optional(),
 	color: z.string().trim().max(32).nullable().optional(),
+	logoUrl: z.string().trim().max(2000).nullable().optional(),
 });
 
 export type FlowProjectUpdateInput = z.infer<typeof flowProjectUpdateInput>;
@@ -55,6 +56,7 @@ export const flowProjectSummaryOutput = z.object({
 	name: z.string(),
 	description: z.string().nullable(),
 	color: z.string().nullable(),
+	logoUrl: z.string().nullable(),
 	company: flowCompany,
 	role: flowRole,
 	canvasCount: z.number(),
@@ -79,6 +81,7 @@ export const flowCanvasSummaryOutput = z.object({
 	type: flowCanvasType,
 	name: z.string(),
 	channel: z.string().nullable(),
+	thumbnailUrl: z.string().nullable(),
 	completeness: z.number(),
 	nodeCount: z.number(),
 	updatedAt: z.string(),
@@ -91,6 +94,9 @@ export const flowAssetOutput = z.object({
 	kind: flowAssetKind,
 	title: z.string(),
 	url: z.string().nullable(),
+	fileUrl: z.string().nullable(),
+	fileType: z.string().nullable(),
+	fileSize: z.number().nullable(),
 	notes: z.string().nullable(),
 	tags: z.array(z.string()),
 	createdAt: z.string(),
@@ -117,6 +123,7 @@ export const flowProjectOutput = z.object({
 	name: z.string(),
 	description: z.string().nullable(),
 	color: z.string().nullable(),
+	logoUrl: z.string().nullable(),
 	company: flowCompany,
 	role: flowRole,
 	members: z.array(flowMemberOutput),
@@ -178,6 +185,11 @@ export const flowCanvasOutput = z.object({
 
 export type FlowCanvas = z.infer<typeof flowCanvasOutput>;
 
+export const flowCanvasThumbnailInput = z.object({
+	id: z.string(),
+	thumbnailUrl: z.string().trim().min(1).max(2000),
+});
+
 export const flowCanvasSaveOutput = z.object({
 	id: z.string(),
 	completeness: z.number(),
@@ -193,6 +205,7 @@ export const flowGuestViewOutput = z.object({
 		name: z.string(),
 		description: z.string().nullable(),
 		color: z.string().nullable(),
+		logoUrl: z.string().nullable(),
 		companyName: z.string().nullable(),
 	}),
 	canvases: z.array(
@@ -209,11 +222,18 @@ export const flowGuestViewOutput = z.object({
 
 export type FlowGuestView = z.infer<typeof flowGuestViewOutput>;
 
+const flowFile = z.object({
+	url: z.string().trim().min(1).max(2000),
+	type: z.string().trim().min(1).max(120),
+	size: z.number().int().nonnegative(),
+});
+
 export const flowAssetCreateInput = z.object({
 	projectId: z.string(),
 	kind: flowAssetKind,
 	title: name,
 	url: z.string().trim().max(2000).default(""),
+	file: flowFile.nullable().default(null),
 	notes: longText.default(""),
 	tags: tags.default([]),
 });

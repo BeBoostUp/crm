@@ -22,9 +22,10 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDelete } from "@/components/flow/confirm-delete";
+import { uploadFlowFile } from "@/components/flow/flow-upload";
 import {
 	PageShell,
 	PageShellActions,
@@ -48,6 +49,7 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 	const nameId = useId();
 	const typeId = useId();
 	const channelId = useId();
+	const logoInput = useRef<HTMLInputElement>(null);
 
 	const { data: project } = useQuery(
 		trpc.flow.getProject.queryOptions({ id: projectId }),
@@ -74,6 +76,22 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 		}),
 	);
 
+	const updateProject = useMutation(
+		trpc.flow.updateProject.mutationOptions({
+			onSuccess: () => cache.flow(),
+			onError: (error) => toast.error(error.message),
+		}),
+	);
+	const uploadLogo = async (file: File): Promise<void> => {
+		try {
+			const uploaded = await uploadFlowFile(file, projectId, "logo");
+			updateProject.mutate({ id: projectId, logoUrl: uploaded.url });
+		} catch (error) {
+			toast.error(
+				error instanceof Error ? error.message : "No se pudo subir el logo.",
+			);
+		}
+	};
 	const removeProject = useMutation(
 		trpc.flow.removeProject.mutationOptions({
 			onSuccess: async () => {
@@ -91,7 +109,18 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 		<PageShell className="min-h-0">
 			<PageShellHeader>
 				<PageShellHeading>
-					<PageShellTitle>{project.name}</PageShellTitle>
+					<PageShellTitle>
+						<span className="flex items-center gap-3">
+							{project.logoUrl ? (
+								<img
+									src={project.logoUrl}
+									alt=""
+									className="size-10 rounded-md object-cover"
+								/>
+							) : null}
+							{project.name}
+						</span>
+					</PageShellTitle>
 					<PageShellDescription>
 						{[
 							project.company?.name ?? "Sin empresa cliente",
@@ -110,6 +139,40 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 						</Link>
 					</Button>
 					<FlowGuestLink project={project} />
+					{project.role === "ADMIN" ? (
+						<>
+							<input
+								type="color"
+								value={project.color ?? "#d4ff00"}
+								aria-label="Color del proyecto"
+								className="size-8 cursor-pointer rounded-md border bg-transparent"
+								onChange={(event) =>
+									updateProject.mutate({
+										id: project.id,
+										color: event.target.value,
+									})
+								}
+							/>
+							<input
+								ref={logoInput}
+								type="file"
+								accept="image/png,image/jpeg,image/webp"
+								className="hidden"
+								onChange={(event) => {
+									const file = event.target.files?.[0];
+									if (file) void uploadLogo(file);
+									event.target.value = "";
+								}}
+							/>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => logoInput.current?.click()}
+							>
+								{project.logoUrl ? "Cambiar logo" : "Logo"}
+							</Button>
+						</>
+					) : null}
 					{project.role === "ADMIN" ? (
 						<ConfirmDelete
 							label="Eliminar proyecto"
@@ -133,8 +196,16 @@ export function FlowProjectView({ projectId }: { projectId: string }) {
 								{project.canvases.map((canvas) => (
 									<li
 										key={canvas.id}
-										className="flex items-start gap-2 rounded-md border bg-card p-3"
+										className="flex items-start gap-2 rounded-md border border-l-4 bg-card p-3"
+										style={{ borderLeftColor: project.color ?? undefined }}
 									>
+										{canvas.thumbnailUrl ? (
+											<img
+												src={canvas.thumbnailUrl}
+												alt=""
+												className="h-14 w-24 shrink-0 rounded-sm border object-cover"
+											/>
+										) : null}
 										<Link
 											href={url(`/flow/${project.id}/canvas/${canvas.id}`)}
 											className="min-w-0 flex-1"

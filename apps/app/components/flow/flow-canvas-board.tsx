@@ -19,6 +19,8 @@ import {
 	Background,
 	Controls,
 	type Edge,
+	getNodesBounds,
+	getViewportForBounds,
 	MiniMap,
 	type OnConnect,
 	type OnEdgesChange,
@@ -28,8 +30,9 @@ import {
 	ReactFlowProvider,
 	useReactFlow,
 } from "@xyflow/react";
+import { toPng } from "html-to-image";
 import { useTheme } from "next-themes";
-import { useRef, useState } from "react";
+import { type Ref, useImperativeHandle, useRef, useState } from "react";
 import {
 	type FlowNodeData,
 	type FlowRfNode,
@@ -45,6 +48,17 @@ const SPAWN_GAP = 40;
 
 const SPAWN_STEPS = 6;
 
+const SNAPSHOT = {
+	background: "#0a0a0a",
+	minZoom: 0.1,
+	maxZoom: 2,
+	padding: 0.08,
+} as const;
+
+export type FlowBoardHandle = {
+	snapshot: (width: number, height: number) => Promise<string | null>;
+};
+
 type Props = {
 	document: FlowCanvasDocument;
 	type: FlowCanvasType;
@@ -52,6 +66,7 @@ type Props = {
 	presentation: boolean;
 	hideInternal?: boolean;
 	onDocumentChange?: (document: FlowCanvasDocument) => void;
+	ref?: Ref<FlowBoardHandle>;
 };
 
 export function FlowCanvasBoard(props: Props) {
@@ -69,15 +84,47 @@ function Board({
 	presentation,
 	hideInternal,
 	onDocumentChange,
+	ref,
 }: Props) {
 	const { resolvedTheme } = useTheme();
-	const { screenToFlowPosition, fitView } = useReactFlow<FlowRfNode, Edge>();
+	const { screenToFlowPosition, fitView, getNodes } = useReactFlow<
+		FlowRfNode,
+		Edge
+	>();
 	const [nodes, setNodes] = useState<FlowRfNode[]>(() => toRfNodes(document));
 	const [edges, setEdges] = useState<Edge[]>(() => toRfEdges(document));
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const nodesRef = useRef(nodes);
 	const edgesRef = useRef(edges);
 	const editing = canEdit && !presentation;
+
+	useImperativeHandle(ref, () => ({
+		snapshot: async (width, height) => {
+			const element = window.document.querySelector<HTMLElement>(
+				".react-flow__viewport",
+			);
+			const measured = getNodes();
+			if (!element || measured.length === 0) return null;
+			const viewport = getViewportForBounds(
+				getNodesBounds(measured),
+				width,
+				height,
+				SNAPSHOT.minZoom,
+				SNAPSHOT.maxZoom,
+				SNAPSHOT.padding,
+			);
+			return toPng(element, {
+				backgroundColor: SNAPSHOT.background,
+				width,
+				height,
+				style: {
+					width: `${width}px`,
+					height: `${height}px`,
+					transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})`,
+				},
+			});
+		},
+	}));
 
 	const commit = (nextNodes: FlowRfNode[], nextEdges: Edge[]): void => {
 		nodesRef.current = nextNodes;

@@ -14,17 +14,25 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@crm/ui/components/select";
+import { Spinner } from "@crm/ui/components/spinner";
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDelete } from "@/components/flow/confirm-delete";
+import {
+	FLOW_UPLOAD,
+	formatBytes,
+	uploadFlowFile,
+} from "@/components/flow/flow-upload";
 import { useCrmCache } from "@/lib/trpc/cache";
 import { useTRPC } from "@/lib/trpc/client";
 import type { RouterOutputs } from "@/lib/trpc/types";
 
 type FlowProject = RouterOutputs["flow"]["getProject"];
 
-type AssetKind = FlowProject["assets"][number]["kind"];
+type FlowAssetRow = FlowProject["assets"][number];
+
+type AssetKind = FlowAssetRow["kind"];
 
 const ASSET_KINDS = {
 	AD: "Anuncio",
@@ -42,14 +50,56 @@ export function FlowProjectLibrary({ project }: { project: FlowProject }) {
 	);
 }
 
+function AssetFile({ asset }: { asset: FlowAssetRow }) {
+	if (!asset.fileUrl) return null;
+	const type = asset.fileType ?? "";
+	if (type.startsWith("image/")) {
+		return (
+			<a href={asset.fileUrl} target="_blank" rel="noreferrer">
+				<img
+					src={asset.fileUrl}
+					alt={asset.title}
+					className="max-h-48 rounded-md border"
+				/>
+			</a>
+		);
+	}
+	if (type.startsWith("video/")) {
+		return (
+			<video
+				src={asset.fileUrl}
+				controls
+				className="max-h-56 rounded-md border"
+			>
+				<track kind="captions" />
+			</video>
+		);
+	}
+	return (
+		<a
+			href={asset.fileUrl}
+			target="_blank"
+			rel="noreferrer"
+			className="text-link text-xs underline-offset-4 hover:underline"
+		>
+			<Icon icon={Launch} data-icon="inline-start" />
+			{type === "application/pdf" ? "Abrir PDF" : "Abrir archivo"}
+			{asset.fileSize ? ` · ${formatBytes(asset.fileSize)}` : ""}
+		</a>
+	);
+}
+
 function FlowAssets({ project }: { project: FlowProject }) {
 	const trpc = useTRPC();
 	const cache = useCrmCache();
+	const fileId = useId();
 	const [kind, setKind] = useState<AssetKind>("AD");
 	const [title, setTitle] = useState("");
 	const [url, setUrl] = useState("");
 	const [notes, setNotes] = useState("");
 	const [tags, setTags] = useState("");
+	const [file, setFile] = useState<File | null>(null);
+	const [uploading, setUploading] = useState(false);
 	const canEdit = project.role !== "VIEWER";
 
 	const create = useMutation(
@@ -60,6 +110,7 @@ function FlowAssets({ project }: { project: FlowProject }) {
 				setUrl("");
 				setNotes("");
 				setTags("");
+				setFile(null);
 			},
 			onError: (error) => toast.error(error.message),
 		}),
@@ -71,12 +122,46 @@ function FlowAssets({ project }: { project: FlowProject }) {
 		}),
 	);
 
+	const submit = async (): Promise<void> => {
+		let uploaded = null;
+		if (file) {
+			setUploading(true);
+			try {
+				uploaded = await uploadFlowFile(file, project.id, "asset");
+			} catch (error) {
+				toast.error(
+					error instanceof Error
+						? error.message
+						: "No se pudo subir el archivo.",
+				);
+				setUploading(false);
+				return;
+			}
+			setUploading(false);
+		}
+		create.mutate({
+			projectId: project.id,
+			kind,
+			title: title.trim(),
+			url: url.trim(),
+			notes: notes.trim(),
+			tags: tags
+				.split(",")
+				.map((tag) => tag.trim())
+				.filter(Boolean),
+			file: uploaded
+				? { url: uploaded.url, type: uploaded.contentType, size: uploaded.size }
+				: null,
+		});
+	};
+
 	return (
 		<section className="space-y-3">
 			<h2 className="font-medium text-sm">AdLibrary</h2>
 			{project.assets.length === 0 ? (
 				<p className="text-muted-foreground text-sm">
-					Guardá acá anuncios de la competencia, landings y referencias.
+					Guardá acá anuncios de la competencia, landings y referencias, con
+					enlace o con archivo.
 				</p>
 			) : (
 				<ul className="space-y-2">
@@ -85,11 +170,12 @@ function FlowAssets({ project }: { project: FlowProject }) {
 							key={asset.id}
 							className="flex items-start gap-2 rounded-md border bg-card p-3"
 						>
-							<div className="min-w-0 flex-1 space-y-1">
+							<div className="min-w-0 flex-1 space-y-2">
 								<div className="flex flex-wrap items-center gap-2">
 									<Badge variant="outline">{ASSET_KINDS[asset.kind]}</Badge>
 									<p className="truncate font-medium text-sm">{asset.title}</p>
 								</div>
+								<AssetFile asset={asset} />
 								{asset.url ? (
 									<a
 										href={asset.url}
@@ -133,17 +219,7 @@ function FlowAssets({ project }: { project: FlowProject }) {
 					className="grid gap-2 sm:grid-cols-2"
 					onSubmit={(event) => {
 						event.preventDefault();
-						create.mutate({
-							projectId: project.id,
-							kind,
-							title: title.trim(),
-							url: url.trim(),
-							notes: notes.trim(),
-							tags: tags
-								.split(",")
-								.map((tag) => tag.trim())
-								.filter(Boolean),
-						});
+						void submit();
 					}}
 				>
 					<Select
@@ -176,6 +252,21 @@ function FlowAssets({ project }: { project: FlowProject }) {
 						aria-label="Enlace"
 						className="sm:col-span-2"
 					/>
+					<div className="sm:col-span-2">
+						<label
+							htmlFor={fileId}
+							className="block text-muted-foreground text-xs"
+						>
+							Archivo (imagen hasta 5 MB, PDF hasta 10 MB, video hasta 30 MB;
+							las imágenes se comprimen solas)
+						</label>
+						<Input
+							id={fileId}
+							type="file"
+							accept={FLOW_UPLOAD.accept}
+							onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+						/>
+					</div>
 					<Input
 						value={notes}
 						onChange={(event) => setNotes(event.target.value)}
@@ -191,9 +282,10 @@ function FlowAssets({ project }: { project: FlowProject }) {
 					<Button
 						type="submit"
 						className="sm:col-span-2"
-						disabled={!title.trim() || create.isPending}
+						disabled={!title.trim() || create.isPending || uploading}
 					>
-						Guardar referencia
+						{uploading || create.isPending ? <Spinner /> : null}
+						{uploading ? "Subiendo…" : "Guardar referencia"}
 					</Button>
 				</form>
 			) : null}

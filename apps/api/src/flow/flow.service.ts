@@ -81,6 +81,7 @@ function canvasSummary(row: CanvasRow): FlowCanvasSummary {
 		type: row.type,
 		name: row.name,
 		channel: row.channel,
+		thumbnailUrl: row.thumbnailUrl,
 		completeness: row.completeness,
 		nodeCount: parseFlowCanvasDocument(row.document).nodes.length,
 		updatedAt: row.updatedAt.toISOString(),
@@ -93,6 +94,9 @@ function asset(row: AssetRow): FlowAsset {
 		kind: row.kind,
 		title: row.title,
 		url: row.url,
+		fileUrl: row.fileUrl,
+		fileType: row.fileType,
+		fileSize: row.fileSize,
 		notes: row.notes,
 		tags: row.tags,
 		createdAt: row.createdAt.toISOString(),
@@ -140,6 +144,7 @@ export class FlowService {
 				name: row.name,
 				description: row.description,
 				color: row.color,
+				logoUrl: row.logoUrl,
 				company: company(row.company),
 				role: row.members[0]?.role ?? "VIEWER",
 				canvasCount: row.canvases.length,
@@ -200,6 +205,7 @@ export class FlowService {
 					description: blank(input.description),
 					companyId: input.companyId,
 					color: input.color,
+					logoUrl: input.logoUrl,
 				},
 				include: projectInclude,
 			});
@@ -306,6 +312,23 @@ export class FlowService {
 		return { id, completeness, updatedAt: row.updatedAt.toISOString() };
 	}
 
+	async setCanvasThumbnail(
+		id: string,
+		thumbnailUrl: string,
+		userId: string,
+	): Promise<{ id: string }> {
+		await this.canvasEditor(id, userId);
+		await this.db.flowCanvas.update({
+			where: { id },
+			data: { thumbnailUrl },
+		});
+		return { id };
+	}
+
+	async assertUploader(projectId: string, userId: string): Promise<void> {
+		this.assertEditor(await this.access(projectId, userId));
+	}
+
 	async updateCanvas(
 		input: FlowCanvasUpdateInput,
 		userId: string,
@@ -378,6 +401,7 @@ export class FlowService {
 				name: link.project.name,
 				description: link.project.description,
 				color: link.project.color,
+				logoUrl: link.project.logoUrl,
 				companyName: link.project.company?.name ?? null,
 			},
 			canvases: link.project.canvases.map((row) => ({
@@ -404,6 +428,9 @@ export class FlowService {
 				kind: input.kind,
 				title: input.title,
 				url: input.url || null,
+				fileUrl: input.file?.url ?? null,
+				fileType: input.file?.type ?? null,
+				fileSize: input.file?.size ?? null,
 				notes: input.notes || null,
 				tags: input.tags,
 			},
@@ -582,6 +609,7 @@ export class FlowService {
 			name: row.name,
 			description: row.description,
 			color: row.color,
+			logoUrl: row.logoUrl,
 			company: company(row.company),
 			role,
 			members: row.members.map((member) => ({

@@ -14,6 +14,7 @@ const PRINT_CSS = `@media print {
 	body * { visibility: hidden; }
 	.flow-print, .flow-print * { visibility: visible; }
 	.flow-print { position: absolute; inset: 0 auto auto 0; width: 100%; padding: 24px; background: white; color: black; }
+	.flow-print img { max-width: 100%; border: 1px solid #ddd; border-radius: 6px; }
 }`;
 
 const subscribe = (): (() => void) => () => {};
@@ -31,11 +32,13 @@ export function FlowPrint({
 	subtitle,
 	document,
 	internal,
+	image,
 }: {
 	title: string;
 	subtitle?: string;
 	document: FlowCanvasDocument;
 	internal: boolean;
+	image?: string | null;
 }) {
 	const mounted = useMounted();
 	if (!mounted) return null;
@@ -54,6 +57,7 @@ export function FlowPrint({
 			<style>{PRINT_CSS}</style>
 			<h1 className="font-semibold text-2xl">{title}</h1>
 			{subtitle ? <p className="text-sm">{subtitle}</p> : null}
+			{image ? <img src={image} alt="" className="mt-4" /> : null}
 			<ol className="mt-6 space-y-4">
 				{orderedNodeIds(document).map((id) => {
 					const node = byId.get(id);
