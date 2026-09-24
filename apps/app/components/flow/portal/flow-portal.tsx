@@ -132,15 +132,15 @@ function Summary() {
 				<p className="mb-3 text-muted-foreground text-xs">
 					Inversión semanal y citas asistidas
 				</p>
-				<div className="flex h-40 items-end gap-4">
+				<div className="flex h-40 items-stretch gap-4">
 					{PORTAL_MOCK.weeks.map((week) => (
 						<div
 							key={week.label}
-							className="flex flex-1 flex-col items-center gap-1"
+							className="flex flex-1 flex-col items-center justify-end gap-1"
 						>
 							<span className="text-xs">{week.visits} citas</span>
 							<div
-								className="w-full rounded-sm bg-primary"
+								className="w-full min-h-1 rounded-sm bg-primary"
 								style={{ height: `${(week.spend / max) * 100}%` }}
 							/>
 							<span className="text-muted-foreground text-xs">
