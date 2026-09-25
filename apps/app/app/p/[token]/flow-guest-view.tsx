@@ -25,7 +25,7 @@ import {
 	FlowCanvasBoard,
 } from "@/components/flow/flow-canvas-board";
 import { FlowPrint } from "@/components/flow/flow-print";
-import { FlowPortal } from "@/components/flow/portal/flow-portal";
+import { GuestPortal } from "@/components/flow/portal/portal-real";
 import { useTRPC } from "@/lib/trpc/client";
 import type { RouterOutputs } from "@/lib/trpc/types";
 
@@ -103,7 +103,7 @@ export function FlowGuestView({
 				>
 					<TabsList>
 						<TabsTrigger value="plan">Plan</TabsTrigger>
-						<TabsTrigger value="portal">Portal · vista previa</TabsTrigger>
+						<TabsTrigger value="portal">Portal</TabsTrigger>
 					</TabsList>
 				</Tabs>
 				{view === "plan" && data.canvases.length > 1 ? (
@@ -148,7 +148,7 @@ export function FlowGuestView({
 
 			{view === "portal" ? (
 				<div className="min-h-0 flex-1 overflow-y-auto p-4">
-					<FlowPortal mode="client" />
+					<GuestPortal token={token} />
 				</div>
 			) : canvas ? (
 				<>

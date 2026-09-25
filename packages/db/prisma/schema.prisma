@@ -1628,6 +1628,12 @@ model FlowProject {
   checklists FlowChecklist[]
   comments   FlowGuestComment[]
   channels   FlowChatChannel[]
+  milestones FlowMilestone[]
+  metrics    FlowMetric[]
+  onboarding FlowOnboardingItem[]
+  decisions  FlowDecision[]
+  tickets    FlowTicket[]
+  secrets    FlowSecret[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1775,4 +1781,117 @@ model FlowChatMessage {
 
   @@index([channelId, createdAt])
   @@map("flowChatMessage")
+}
+
+enum FlowMilestoneStatus {
+  PENDING
+  IN_PROGRESS
+  DELIVERED
+  APPROVED
+}
+
+enum FlowOnboardingKind {
+  QUESTION
+  ASSET
+}
+
+enum FlowTicketStatus {
+  OPEN
+  RESOLVED
+}
+
+model FlowMilestone {
+  id           String              @id @default(cuid())
+  projectId    String
+  project      FlowProject         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title        String
+  description  String?
+  dueAt        DateTime?
+  position     Int                 @default(0)
+  status       FlowMilestoneStatus @default(PENDING)
+  deliverables Json
+  approvedAt   DateTime?
+  approvedBy   String?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  @@index([projectId, position])
+  @@map("flowMilestone")
+}
+
+model FlowMetric {
+  id        String      @id @default(cuid())
+  projectId String
+  project   FlowProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  weekStart DateTime
+  spend     Float       @default(0)
+  leads     Int         @default(0)
+  booked    Int         @default(0)
+  attended  Int         @default(0)
+  sales     Int         @default(0)
+  notes     String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@unique([projectId, weekStart])
+  @@map("flowMetric")
+}
+
+model FlowOnboardingItem {
+  id        String             @id @default(cuid())
+  projectId String
+  project   FlowProject        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  kind      FlowOnboardingKind
+  label     String
+  answer    String?
+  done      Boolean            @default(false)
+  position  Int                @default(0)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  @@index([projectId, position])
+  @@map("flowOnboardingItem")
+}
+
+model FlowDecision {
+  id        String      @id @default(cuid())
+  projectId String
+  project   FlowProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title     String
+  why       String
+  author    String
+  decidedAt DateTime    @default(now())
+
+  @@index([projectId, decidedAt])
+  @@map("flowDecision")
+}
+
+model FlowTicket {
+  id        String           @id @default(cuid())
+  projectId String
+  project   FlowProject      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title     String
+  body      String?
+  author    String
+  status    FlowTicketStatus @default(OPEN)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([projectId, status, createdAt])
+  @@map("flowTicket")
+}
+
+model FlowSecret {
+  id         String      @id @default(cuid())
+  projectId  String
+  project    FlowProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name       String
+  username   String?
+  ciphertext String
+  iv         String
+  updatedAt  DateTime    @updatedAt
+  createdAt  DateTime    @default(now())
+
+  @@index([projectId])
+  @@map("flowSecret")
 }

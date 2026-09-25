@@ -43,8 +43,8 @@ export function FlowPortalPage({
 				<PageShellHeading>
 					<PageShellTitle>Portal · {project.name}</PageShellTitle>
 					<PageShellDescription>
-						Cómo quedaría el seguimiento del proyecto: hitos, resultados,
-						facturación, atribución, contenido y documentación.
+						Seguimiento del proyecto: onboarding, hitos, resultados, soporte,
+						documentación y lo que viene.
 					</PageShellDescription>
 				</PageShellHeading>
 				<PageShellActions>
@@ -68,7 +68,15 @@ export function FlowPortalPage({
 				</PageShellActions>
 			</PageShellHeader>
 			<PageShellContent className="min-h-0 overflow-y-auto">
-				<FlowPortal mode={mode} section={section} />
+				<FlowPortal
+					mode={mode}
+					section={section}
+					project={{
+						id: project.id,
+						canEdit: project.role !== "VIEWER",
+						isAdmin: project.role === "ADMIN",
+					}}
+				/>
 			</PageShellContent>
 		</PageShell>
 	);

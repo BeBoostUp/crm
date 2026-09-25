@@ -19,8 +19,37 @@ import {
 	PORTAL_MOCK,
 	PORTAL_MOCK_2,
 } from "./portal-mock";
+import {
+	RealDocs,
+	RealMilestones,
+	RealOnboarding,
+	RealSummary,
+	RealSupport,
+} from "./portal-real";
 
 type Mode = "team" | "client";
+
+type Project = { id: string; canEdit: boolean; isAdmin: boolean };
+
+function realSections(
+	project: Project,
+): Partial<Record<FlowSection, React.ReactNode>> {
+	return {
+		onboarding: (
+			<RealOnboarding projectId={project.id} canEdit={project.canEdit} />
+		),
+		hitos: <RealMilestones projectId={project.id} canEdit={project.canEdit} />,
+		resumen: <RealSummary projectId={project.id} canEdit={project.canEdit} />,
+		soporte: <RealSupport projectId={project.id} canEdit={project.canEdit} />,
+		docs: (
+			<RealDocs
+				projectId={project.id}
+				canEdit={project.canEdit}
+				isAdmin={project.isAdmin}
+			/>
+		),
+	};
+}
 
 const STATUS_VARIANT = {
 	pendiente: "outline",
@@ -41,11 +70,12 @@ const PIECE_VARIANT = {
 	publicado: "default",
 } as const;
 
-function Preview() {
+function Preview({ partial = false }: { partial?: boolean }) {
 	return (
 		<p className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-xs">
-			Vista previa con datos de ejemplo. Nada de esto se guarda todavía: sirve
-			para decidir cómo queda antes de construirlo.
+			{partial
+				? "Onboarding, hitos, resumen, soporte y documentación ya guardan datos reales. Facturación, atribución, contenido y plantillas siguen siendo vista previa con datos de ejemplo."
+				: "Vista previa con datos de ejemplo. Nada de esto se guarda todavía: sirve para decidir cómo queda antes de construirlo."}
 		</p>
 	);
 }
@@ -638,18 +668,26 @@ function Tiers() {
 export function FlowPortal({
 	mode,
 	section,
+	project,
 }: {
 	mode: Mode;
 	section?: FlowSection;
+	project?: Project;
 }) {
+	const real = project ? realSections(project) : {};
+	const render = (key: FlowSection, mock: React.ReactNode) => real[key] ?? mock;
 	if (section) {
 		return (
 			<div className="space-y-4">
-				<Preview />
+				{real[section] ? null : <Preview />}
 				<h1 className="font-semibold text-lg">{FLOW_SECTIONS[section]}</h1>
-				{section === "onboarding" ? <Onboarding mode={mode} /> : null}
-				{section === "hitos" ? <Milestones mode={mode} /> : null}
-				{section === "resumen" ? <Summary /> : null}
+				{section === "onboarding"
+					? render("onboarding", <Onboarding mode={mode} />)
+					: null}
+				{section === "hitos"
+					? render("hitos", <Milestones mode={mode} />)
+					: null}
+				{section === "resumen" ? render("resumen", <Summary />) : null}
 				{section === "facturacion" ? (
 					<div className="space-y-6">
 						<Billing mode={mode} />
@@ -663,8 +701,10 @@ export function FlowPortal({
 					</div>
 				) : null}
 				{section === "contenido" ? <Content mode={mode} /> : null}
-				{section === "soporte" ? <Support mode={mode} /> : null}
-				{section === "docs" ? <Docs mode={mode} /> : null}
+				{section === "soporte"
+					? render("soporte", <Support mode={mode} />)
+					: null}
+				{section === "docs" ? render("docs", <Docs mode={mode} />) : null}
 				{section === "plantillas" ? (
 					<div className="space-y-6">
 						<Templates />
@@ -676,7 +716,7 @@ export function FlowPortal({
 	}
 	return (
 		<div className="space-y-4">
-			<Preview />
+			<Preview partial={Boolean(project)} />
 			<Tabs defaultValue="hitos">
 				<TabsList className="flex-wrap">
 					<TabsTrigger value="onboarding">Onboarding</TabsTrigger>
@@ -696,13 +736,13 @@ export function FlowPortal({
 					) : null}
 				</TabsList>
 				<TabsContent value="onboarding" className="pt-4">
-					<Onboarding mode={mode} />
+					{render("onboarding", <Onboarding mode={mode} />)}
 				</TabsContent>
 				<TabsContent value="hitos" className="pt-4">
-					<Milestones mode={mode} />
+					{render("hitos", <Milestones mode={mode} />)}
 				</TabsContent>
 				<TabsContent value="resumen" className="pt-4">
-					<Summary />
+					{render("resumen", <Summary />)}
 				</TabsContent>
 				<TabsContent value="facturacion" className="space-y-6 pt-4">
 					<Billing mode={mode} />
@@ -716,10 +756,10 @@ export function FlowPortal({
 					<Content mode={mode} />
 				</TabsContent>
 				<TabsContent value="soporte" className="pt-4">
-					<Support mode={mode} />
+					{render("soporte", <Support mode={mode} />)}
 				</TabsContent>
 				<TabsContent value="docs" className="pt-4">
-					<Docs mode={mode} />
+					{render("docs", <Docs mode={mode} />)}
 				</TabsContent>
 				<TabsContent value="plantillas" className="space-y-6 pt-4">
 					<Templates />

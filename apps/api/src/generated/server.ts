@@ -24,7 +24,8 @@ import { dashboardSummaryInput, dashboardSummaryOutput } from "../dashboard/dash
 import { dealListInput, dealListOutput, dealIdInput, dealDetailOutput, dealCreateInput, dealCreateOutput, dealUpdateArgs, dealMutateOutput, setStageInput, dealSetStageOutput, dealContactsInput, dealContactOptionsOutput, dealAttachContactInput, dealContactLinkOutput, dealDetachContactInput, dealContactRoleInput, dealContactRoleOutput, dealBulkOwnerInput, dealBulkResultOutput, dealBulkStageInput, dealBulkInput } from "../deals/deals.contracts";
 import { enrichmentQueueInput } from "@crm/validation/enrichment-queue";
 import { fieldListInput, fieldListOutput, fieldByKeyInput, serializedFieldOutput, fieldEntityInput, fieldFiltersOutput, fieldIdInput, fieldCoverageOutput, fieldCreateInput, fieldUpdateArgs, fieldReorderInput, fieldReorderOutput, fieldDeleteOutput, fieldBackfillOutput } from "../fields/fields.contracts";
-import { flowProjectListOutput, flowIdInput, flowProjectOutput, flowProjectCreateInput, flowProjectUpdateInput, flowDeleteOutput, flowMemberSetInput, flowMemberRemoveInput, flowCanvasCreateInput, flowCanvasSummaryOutput, flowCanvasOutput, flowCanvasSaveInput, flowCanvasSaveOutput, flowCanvasThumbnailInput, flowCanvasUpdateInput, flowGuestLinkCreateInput, flowGuestLinkOutput, flowProjectIdInput, flowGuestTokenInput, flowGuestViewOutput, flowGuestCommentInput, flowGuestCommentOutput, flowChatChannelListOutput, flowChatMessagesInput, flowChatMessageListOutput, flowChatSendInput, flowChatMessageOutput, flowAssetCreateInput, flowAssetOutput, flowAssetUpdateInput, flowChecklistCreateInput, flowChecklistOutput, flowChecklistsReorderInput, flowChecklistItemCreateInput, flowChecklistReorderInput, flowChecklistItemUpdateInput } from "../flow/flow.contracts";
+import { flowProjectIdInput, flowIdInput, flowDeleteOutput, flowProjectListOutput, flowProjectOutput, flowProjectCreateInput, flowProjectUpdateInput, flowMemberSetInput, flowMemberRemoveInput, flowCanvasCreateInput, flowCanvasSummaryOutput, flowCanvasOutput, flowCanvasSaveInput, flowCanvasSaveOutput, flowCanvasThumbnailInput, flowCanvasUpdateInput, flowGuestLinkCreateInput, flowGuestLinkOutput, flowGuestTokenInput, flowGuestViewOutput, flowGuestCommentInput, flowGuestCommentOutput, flowChatChannelListOutput, flowChatMessagesInput, flowChatMessageListOutput, flowChatSendInput, flowChatMessageOutput, flowAssetCreateInput, flowAssetOutput, flowAssetUpdateInput, flowChecklistCreateInput, flowChecklistOutput, flowChecklistsReorderInput, flowChecklistItemCreateInput, flowChecklistReorderInput, flowChecklistItemUpdateInput } from "../flow/flow.contracts";
+import { portalOutput, milestoneCreateInput, milestoneOutput, milestoneUpdateInput, metricUpsertInput, metricOutput, onboardingCreateInput, onboardingItemOutput, onboardingAnswerInput, decisionCreateInput, decisionOutput, ticketCreateInput, ticketOutput, ticketUpdateInput, secretSetInput, secretOutput, secretRevealOutput, flowTokenInput, guestPortalOutput, guestApproveInput, guestAnswerInput, guestTicketInput } from "../flow/flow-portal.contracts";
 import { googleConnectionStatusOutput, setAutoCreateInput, suppressDomainInput, suppressDomainOutput, threadInput, emailThreadOutput, calendarEventInput, calendarEventOutput } from "../google/google.contracts";
 import { purgeSyncedDataOutput, revokeAccessOutput, microsoftConnectionStatusOutput, setOutlookAutoCreateInput } from "../microsoft/microsoft.contracts";
 import { savedViewListInput, savedViewListOutput, savedViewCreateInput, savedViewOutput, savedViewUpdateArgs, savedViewIdInput, savedViewDeleteOutput } from "../saved-views/saved-views.contracts";
@@ -527,6 +528,88 @@ const appRouter = t.router({
     backfill: publicProcedure
       .input(fieldIdInput)
       .output(fieldBackfillOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any)
+    }),
+  flowPortal: t.router({
+    get: publicProcedure
+      .input(flowProjectIdInput)
+      .output(portalOutput)
+      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    createMilestone: publicProcedure
+      .input(milestoneCreateInput)
+      .output(milestoneOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    updateMilestone: publicProcedure
+      .input(milestoneUpdateInput)
+      .output(milestoneOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    removeMilestone: publicProcedure
+      .input(flowIdInput)
+      .output(flowDeleteOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    upsertMetric: publicProcedure
+      .input(metricUpsertInput)
+      .output(metricOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    removeMetric: publicProcedure
+      .input(flowIdInput)
+      .output(flowDeleteOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    createOnboardingItem: publicProcedure
+      .input(onboardingCreateInput)
+      .output(onboardingItemOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    answerOnboardingItem: publicProcedure
+      .input(onboardingAnswerInput)
+      .output(onboardingItemOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    removeOnboardingItem: publicProcedure
+      .input(flowIdInput)
+      .output(flowDeleteOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    createDecision: publicProcedure
+      .input(decisionCreateInput)
+      .output(decisionOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    removeDecision: publicProcedure
+      .input(flowIdInput)
+      .output(flowDeleteOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    createTicket: publicProcedure
+      .input(ticketCreateInput)
+      .output(ticketOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    updateTicket: publicProcedure
+      .input(ticketUpdateInput)
+      .output(ticketOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    setSecret: publicProcedure
+      .input(secretSetInput)
+      .output(secretOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    revealSecret: publicProcedure
+      .input(flowIdInput)
+      .output(secretRevealOutput)
+      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    removeSecret: publicProcedure
+      .input(flowIdInput)
+      .output(flowDeleteOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    guestPortal: publicProcedure
+      .input(flowTokenInput)
+      .output(guestPortalOutput)
+      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    guestApprove: publicProcedure
+      .input(guestApproveInput)
+      .output(milestoneOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    guestAnswer: publicProcedure
+      .input(guestAnswerInput)
+      .output(onboardingItemOutput)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    guestTicket: publicProcedure
+      .input(guestTicketInput)
+      .output(ticketOutput)
       .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any)
     }),
   flow: t.router({
